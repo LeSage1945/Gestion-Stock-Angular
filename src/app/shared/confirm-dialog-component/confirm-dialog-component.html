@@ -1,0 +1,21 @@
+<div class="confirm-container p-3">
+
+  <h4 class="mb-3">
+    {{ data?.title || 'Confirmation' }}
+  </h4>
+
+  <p class="text-muted">
+    {{ data?.message || 'Êtes-vous sûr de vouloir continuer ?' }}
+  </p>
+
+  <div class="d-flex justify-content-end gap-2 mt-4">
+    <button class="btn btn-secondary" (click)="cancel()">
+      Annuler
+    </button>
+
+    <button class="btn btn-danger" (click)="confirm()">
+      Confirmer
+    </button>
+  </div>
+
+</div>

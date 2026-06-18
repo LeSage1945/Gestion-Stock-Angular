@@ -1,0 +1,97 @@
+<div class="card border-0 shadow-sm rounded-4">
+  <div class="card-body p-4">
+    <!-- ================= HEADER ================= -->
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="fw-bold mb-0">
+        {{ titre }}
+      </h5>
+    </div>
+
+    <!-- ================= SEARCH ================= -->
+
+    @if (enableSearch) {
+      <div class="mb-3">
+        <input
+          type="text"
+          class="form-control form-control-lg rounded-3"
+          placeholder="🔍 Rechercher..."
+          [(ngModel)]="searchText"
+        />
+      </div>
+    }
+
+    <!-- ================= TABLE ================= -->
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <!-- HEADER -->
+        <thead class="table-dark">
+          <tr>
+            @for (item of columns; track item.field) {
+              <th class="text-uppercase small fw-semibold">
+                {{ item.label }}
+              </th>
+            }
+
+            @if (actions) {
+              <th class="text-center text-uppercase small fw-semibold">Actions</th>
+            }
+          </tr>
+        </thead>
+
+        <!-- BODY -->
+        <tbody>
+          @for (row of filteredData; track row.id) {
+            <tr class="align-middle">
+              @for (col of columns; track col.field) {
+                <td
+                  class="py-3"
+                  [ngClass]="{
+                    'fw-semibold': col.isRole,
+                  }"
+                  [ngStyle]="col.isRole ? roleStyleFn(row[col.field]) : {}"
+                >
+                  {{ row[col.field] }}
+                </td>
+              }
+
+              @if (actions) {
+                <td class="text-center">
+                  <div class="d-flex justify-content-center gap-2">
+                    <!-- VIEW -->
+                    <button
+                      class="btn btn-sm btn-info rounded-circle"
+                      style="width: 36px; height: 36px"
+                      (click)="view.emit(row)"
+                    >
+                      <i class="bi bi-eye text-white"></i>
+                    </button>
+
+                    <!-- EDIT -->
+                    <button
+                      class="btn btn-sm btn-warning rounded-circle"
+                      style="width: 36px; height: 36px"
+                      (click)="edit.emit(row)"
+                    >
+                      <i class="bi bi-pencil text-white"></i>
+                    </button>
+
+                    <!-- DELETE -->
+                    <button
+                      class="btn btn-sm btn-danger rounded-circle"
+                      style="width: 36px; height: 36px"
+                      (click)="delete.emit(row)"
+                    >
+                      <i class="bi bi-trash text-white"></i>
+                    </button>
+                  </div>
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

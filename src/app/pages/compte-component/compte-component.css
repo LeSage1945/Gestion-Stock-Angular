@@ -1,0 +1,91 @@
+/* Conteneur principal */
+.dashboard-content {
+  padding: 1.5rem;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+.page-title {
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+/* Bouton principal Bleu */
+.btn-primary.btn-add {
+  background-color: #0d6efd;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-weight: 500;
+}
+
+.btn-primary.btn-add:hover {
+  background-color: #0b5ed7;
+}
+
+/* Cartes blanches arrondis */
+.grid-card {
+  border-radius: 12px !important;
+  overflow: hidden;
+}
+
+.table-section-title {
+  color: #2c3e50;
+  font-size: 1.1rem;
+}
+
+/* Styles du Tableau */
+.custom-table thead tr {
+  background-color: #1e2229; /* Le même noir/gris foncé que ton entête */
+}
+
+.custom-table th {
+  color: #ffffff !important;
+  font-weight: 600;
+  padding: 12px 16px;
+  border: none;
+}
+
+.custom-table td {
+  padding: 16px;
+  border-bottom: 1px solid #f2f2f2;
+  color: #333;
+}
+
+/* Boutons d'actions ronds comme sur ta capture */
+.btn-action {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  font-size: 0.85rem;
+  transition: transform 0.2s;
+  color: white;
+}
+
+.btn-action:hover {
+  transform: scale(1.1);
+}
+
+.btn-edit-item {
+  background-color: #17a2b8; /* Cyan */
+}
+
+.btn-delete-item {
+  background-color: #dc3545; /* Rouge */
+}
+
+/* Inputs du formulaire */
+.form-control {
+  border-radius: 6px;
+  padding: 10px;
+  border: 1px solid #ced4da;
+}
+
+.form-control:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}

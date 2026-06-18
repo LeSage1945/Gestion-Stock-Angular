@@ -1,0 +1,220 @@
+<div class="container-fluid">
+  <!-- ===================== HEADER ===================== -->
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold mb-1">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        {{ TitrePage() }}
+      </h2>
+
+      <p class="text-muted mb-0">Produits nécessitant un réapprovisionnement</p>
+    </div>
+  </div>
+
+  <!-- ===================== LOADER ===================== -->
+
+  @if (isLoading()) {
+    <app-loader-component [isLoading]="isLoading()"> </app-loader-component>
+  } @else {
+    <!-- ===================== SEARCH ===================== -->
+
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+      <div class="card-body">
+        <div class="input-group">
+          <span class="input-group-text bg-white border-end-0">
+            <i class="bi bi-search"></i>
+          </span>
+
+          <input
+            type="text"
+            class="form-control border-start-0"
+            placeholder="Rechercher un produit..."
+            [value]="recherche()"
+            (input)="onSearch($any($event.target).value)"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== STATS ===================== -->
+
+    <div class="row g-4 mb-4">
+      <!-- CRITIQUE -->
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-4 bg-danger text-white h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="text-uppercase opacity-75">Stock critique</h6>
+
+                <h2 class="fw-bold mb-0">
+                  {{ critique() }}
+                </h2>
+              </div>
+
+              <i class="bi bi-x-octagon fs-1 opacity-50"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAIBLE -->
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-4 bg-warning text-white h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="text-uppercase opacity-75">Stock faible</h6>
+
+                <h2 class="fw-bold mb-0">
+                  {{ faible() }}
+                </h2>
+              </div>
+
+              <i class="bi bi-exclamation-circle fs-1 opacity-50"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OK -->
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-4 bg-success text-white h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="text-uppercase opacity-75">Stock OK</h6>
+
+                <h2 class="fw-bold mb-0">
+                  {{ ok() }}
+                </h2>
+              </div>
+
+              <i class="bi bi-check-circle fs-1 opacity-50"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== TABLE ===================== -->
+
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="card-body p-4">
+        <!-- HEADER TABLE -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <h5 class="fw-bold mb-1">
+              <i class="bi bi-table me-2"></i>
+              Détail des alertes
+            </h5>
+
+            <p class="text-muted mb-0">
+              @if (alertFiltre().length > 0) {
+                {{ alertFiltre().length }}
+                alerte(s) trouvée(s)
+              } @else {
+                Aucune alerte disponible
+              }
+            </p>
+          </div>
+        </div>
+
+        <!-- TABLE -->
+        @if (alertFiltre().length > 0) {
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead class="table-dark">
+                <tr>
+                  <th>Produit</th>
+
+                  <th>Marque</th>
+
+                  <th>Stock actuel</th>
+
+                  <th>Niveau</th>
+
+                  <th class="text-center">Actions</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                @for (item of alertFiltre(); track item.id) {
+                  <tr>
+                    <!-- PRODUIT -->
+                    <td>
+                      <div class="fw-semibold">
+                        {{ item.produit.nom }}
+                      </div>
+                    </td>
+
+                    <!-- MARQUE -->
+                    <td>
+                      {{ item.produit.marque }}
+                    </td>
+
+                    <!-- STOCK -->
+                    <td>
+                      <span class="badge bg-secondary px-3 py-2">
+                        {{ item.quantiteActuelle }}
+                      </span>
+                    </td>
+
+                    <!-- NIVEAU -->
+                    <td>
+                      @if (item.quantiteActuelle <= 0) {
+                        <span class="badge bg-danger px-3 py-2">
+                          <i class="bi bi-x-circle me-1"></i>
+
+                          Critique
+                        </span>
+                      } @else if (item.quantiteActuelle <= item.niveauAlerte) {
+                        <span class="badge bg-warning text-dark px-3 py-2">
+                          <i class="bi bi-exclamation-circle me-1"></i>
+
+                          Faible
+                        </span>
+                      } @else {
+                        <span class="badge bg-success px-3 py-2">
+                          <i class="bi bi-check-circle me-1"></i>
+
+                          OK
+                        </span>
+                      }
+                    </td>
+
+                    <!-- ACTION -->
+                    <td>
+                      <div class="d-flex justify-content-center">
+                        <button
+                          class="btn btn-primary rounded-3 shadow-sm"
+                          (click)="onReapprovisionner(item)"
+                          [disabled]="item.quantiteActuelle > item.niveauAlerte"
+                        >
+                          <i class="bi bi-arrow-repeat me-2"></i>
+
+                          Réapprovisionner
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <!-- EMPTY -->
+
+          <div class="text-center py-5">
+            <i class="bi bi-inbox fs-1 text-muted"></i>
+
+            <h5 class="mt-3 text-muted">Aucune alerte trouvée</h5>
+
+            <p class="text-muted">Tous les produits sont en stock.</p>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

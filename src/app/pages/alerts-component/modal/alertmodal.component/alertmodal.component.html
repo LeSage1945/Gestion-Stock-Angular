@@ -1,0 +1,86 @@
+<div class="modal fade show d-block" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      <!-- ================= HEADER ================= -->
+
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold">🔁 Réapprovisionnement</h5>
+
+        <button class="btn-close" (click)="close()"></button>
+      </div>
+
+      <!-- ================= BODY ================= -->
+
+      <div class="modal-body px-4">
+        <!-- PRODUIT -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold"> Produit </label>
+
+          <input
+            class="form-control form-control-lg rounded-3"
+            [value]="data.produit.nom"
+            disabled
+          />
+        </div>
+
+        <!-- MARQUE -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold"> Marque </label>
+
+          <input
+            class="form-control form-control-lg rounded-3"
+            [value]="data.produit.marque"
+            disabled
+          />
+        </div>
+
+        <!-- FOURNISSEUR -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold"> Fournisseur </label>
+
+          <select class="form-select form-select-lg rounded-3" [(ngModel)]="fournisseurId">
+            <option value="" disabled selected>Sélectionner un fournisseur</option>
+
+            @for (f of fournisseurs; track f.id) {
+              <option [value]="f.id">
+                {{ f.nom }}
+              </option>
+            }
+          </select>
+        </div>
+
+        <!-- QUANTITE -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold"> Quantité </label>
+
+          <input
+            type="number"
+            class="form-control form-control-lg rounded-3"
+            [(ngModel)]="quantite"
+            placeholder="Ex: 10"
+          />
+        </div>
+
+        <!-- PRIX -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold"> Prix d'achat </label>
+
+          <input
+            type="number"
+            class="form-control form-control-lg rounded-3"
+            [(ngModel)]="prixAchat"
+            placeholder="Ex: 5000"
+          />
+        </div>
+      </div>
+
+      <!-- ================= FOOTER ================= -->
+
+      <div class="modal-footer border-0 px-4 pb-4">
+        <button class="btn btn-light px-4" (click)="close()">Annuler</button>
+
+        <button class="btn btn-primary px-4 shadow-sm" (click)="save()">Valider</button>
+      </div>
+    </div>
+  </div>
+</div>

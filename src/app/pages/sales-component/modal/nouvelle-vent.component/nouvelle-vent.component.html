@@ -1,0 +1,146 @@
+<div class="container-fluid p-4" style="max-width: 1100px">
+  <!-- ================= HEADER ================= -->
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h3 class="fw-bold mb-1">🛒 Nouvelle vente</h3>
+
+      <p class="text-muted mb-0">Sélectionnez les produits et finalisez la transaction</p>
+    </div>
+
+    <button class="btn btn-light border" (click)="fermer()">← Retour</button>
+  </div>
+
+  <div class="row g-4">
+    <!-- ================= PRODUITS ================= -->
+
+    <div class="col-md-7">
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4">
+          <h5 class="fw-bold mb-3">📦 Produits disponibles</h5>
+
+          <!-- SEARCH -->
+          <input
+            [(ngModel)]="search"
+            class="form-control form-control-lg rounded-3 mb-3"
+            placeholder="🔎 Rechercher un produit..."
+          />
+
+          <!-- TABLE PRODUITS -->
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead class="table-dark">
+                <tr>
+                  <th>Nom</th>
+
+                  <th>Prix</th>
+
+                  <th class="text-center">Action</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                @for (item of produit; track item.id) {
+                  <tr>
+                    <td class="fw-semibold">
+                      {{ item.nom }}
+                    </td>
+
+                    <td>{{ item.prix }} FCFA</td>
+
+                    <td class="text-center">
+                      <button class="btn btn-sm btn-success px-3" (click)="ajouterProduit(item)">
+                        Ajouter
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= PANIER ================= -->
+
+    <div class="col-md-5">
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4">
+          <h5 class="fw-bold mb-3">🧾 Panier</h5>
+
+          <!-- TABLE PANIER -->
+          <div class="table-responsive">
+            <table class="table table-sm align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Produit</th>
+
+                  <th>Qté</th>
+
+                  <th>Prix</th>
+
+                  <th>Total</th>
+
+                  <th></th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <tr *ngFor="let item of panier; let i = index">
+                  <td>{{ item.nom }}</td>
+
+                  <td>{{ item.quantite }}</td>
+
+                  <td>{{ item.prix }}</td>
+
+                  <td class="fw-semibold">
+                    {{ item.total }}
+                  </td>
+
+                  <td>
+                    <button class="btn btn-sm btn-outline-danger" (click)="removeProduit(i)">
+                      X
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <hr />
+
+          <!-- ================= TOTAL ================= -->
+
+          <div class="d-flex justify-content-between mb-3">
+            <span class="fw-bold"> Total </span>
+
+            <span class="fw-bold text-success fs-5"> {{ total }} FCFA </span>
+          </div>
+
+          <!-- ================= PAYMENT ================= -->
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold"> Mode de paiement </label>
+
+            <select class="form-select form-select-lg rounded-3">
+              <option>Espèce</option>
+
+              <option>Mobile Money</option>
+            </select>
+          </div>
+
+          <!-- ================= ACTIONS ================= -->
+
+          <button class="btn btn-success btn-lg w-100 mb-2 shadow-sm" (click)="validerVente()">
+            Valider la vente
+          </button>
+
+          <button class="btn btn-outline-danger w-100" (click)="panier = []; total = 0">
+            Vider le panier
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

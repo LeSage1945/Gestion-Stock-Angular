@@ -1,0 +1,129 @@
+<div class="dashboard-content">
+  <div class="page-header d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="page-title d-flex align-items-center gap-2">
+        <span>👤</span> Gestion des Administrateurs
+      </h2>
+      <p class="text-muted m-0">Création des utilisateurs et affectation aux comptes (SaaS)</p>
+    </div>
+  </div>
+
+  <div class="card mb-4 shadow-sm border-0 grid-card">
+    <div class="card-body">
+      <h4 class="card-title mb-3">Ajouter un nouvel Administrateur</h4>
+
+      <form (submit)="$event.preventDefault()">
+        <div class="row g-3">
+          <div class="col-md-3">
+            <label class="form-label text-muted small fw-bold">Nom complet</label>
+            <input
+              type="text"
+              class="form-control"
+              [value]="userForm().nom"
+              (input)="updateField('nom', $any($event.target).value)"
+              placeholder="Ex: Jean Dupont"
+            />
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label text-muted small fw-bold">Adresse Email</label>
+            <input
+              type="email"
+              class="form-control"
+              [value]="userForm().email"
+              (input)="updateField('email', $any($event.target).value)"
+              placeholder="jean.dupont@example.com"
+            />
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label text-muted small fw-bold">Mot de passe</label>
+            <input
+              type="password"
+              class="form-control"
+              [value]="userForm().motDePasse"
+              (input)="updateField('motDePasse', $any($event.target).value)"
+              placeholder="••••••••"
+            />
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label text-muted small fw-bold">Affecter à un Compte</label>
+            <select
+              class="form-select select-custom"
+              [value]="selectedCompteId()"
+              (change)="selectedCompteId.set($any($event.target).value)"
+            >
+              <option value="">-- Choisir un compte --</option>
+              @for (c of comptes(); track c.id) {
+                <option [value]="c.id">{{ c.code }} - {{ c.nom }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="col-12 d-flex justify-content-end mt-3">
+            <button
+              type="button"
+              class="btn btn-primary btn-add px-4"
+              (click)="createUserWithAccount()"
+            >
+              Enregistrer et Affecter
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0 grid-card">
+    <div class="card-body p-0">
+      <div class="p-3 border-bottom d-flex align-items-center gap-2">
+        <span>📋</span>
+        <strong class="table-section-title">Liste des Utilisateurs par Compte</strong>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 custom-table">
+          <thead>
+            <tr>
+              <th scope="col">Nom</th>
+              <th scope="col">Email</th>
+              <th scope="col">Compte rattaché</th>
+              <th scope="col" class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (u of utilisateurs(); track u.id) {
+              <tr>
+                <td class="fw-bold">{{ u.nom }}</td>
+                <td>{{ u.email }}</td>
+                <td>
+                  <span class="badge bg-light text-dark border px-2 py-1">
+                    {{ u.compteNom || 'Aucun compte' }}
+                  </span>
+                </td>
+                <td class="text-end">
+                  <div class="d-flex justify-content-end gap-2 pe-2">
+                    <button
+                      class="btn btn-action btn-delete-item"
+                      title="Supprimer"
+                      (click)="deleteUser(u.id!)"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4" class="text-center py-4 text-muted">
+                  Aucun utilisateur enregistré.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

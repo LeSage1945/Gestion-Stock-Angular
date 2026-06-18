@@ -1,0 +1,25 @@
+ body {
+    background-color: #f5f7fb;
+  }
+
+  .icon-box {
+    width: 70px;
+    height: 70px;
+    border-radius: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 30px;
+  }
+
+  .card {
+    background: white;
+  }
+
+  table th {
+    font-weight: 600;
+  }
+
+  .rounded-4 {
+    border-radius: 20px;
+  }

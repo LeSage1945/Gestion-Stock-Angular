@@ -1,0 +1,95 @@
+<div class="container-fluid p-4">
+  <!-- ================= HEADER ================= -->
+
+  <div class="mb-4">
+    <h3 class="fw-bold mb-1">➕ Ajouter un produit</h3>
+
+    <p class="text-muted mb-0">Remplissez les informations du produit</p>
+  </div>
+
+  <!-- ================= CARD ================= -->
+
+  <div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-4">
+      <form [formGroup]="produitForm" (ngSubmit)="onSubmit()">
+        <!-- ================= NOM ================= -->
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold"> Nom </label>
+
+          <input
+            type="text"
+            class="form-control form-control-lg rounded-3"
+            formControlName="nom"
+            placeholder="Ex: Marlboro Red"
+          />
+
+          @if (produitForm.get('nom')?.invalid && produitForm.get('nom')?.touched) {
+            <small class="text-danger"> Nom obligatoire </small>
+          }
+        </div>
+
+        <!-- ================= MARQUE ================= -->
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold"> Marque </label>
+
+          <input
+            type="text"
+            class="form-control form-control-lg rounded-3"
+            formControlName="marque"
+            placeholder="Ex: Philip Morris"
+          />
+
+          @if (produitForm.get('marque')?.invalid && produitForm.get('marque')?.touched) {
+            <small class="text-danger"> Marque obligatoire </small>
+          }
+        </div>
+
+        <!-- ================= PRIX ================= -->
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold"> Prix </label>
+
+          <input
+            type="number"
+            class="form-control form-control-lg rounded-3"
+            formControlName="prix"
+            placeholder="Ex: 2500"
+          />
+
+          @if (produitForm.get('prix')?.invalid && produitForm.get('prix')?.touched) {
+            <small class="text-danger"> Prix obligatoire </small>
+          }
+        </div>
+
+        <!-- ================= SEUIL ALERTE ================= -->
+
+        <div class="mb-4">
+          <label class="form-label fw-semibold"> Seuil d’alerte </label>
+
+          <input
+            type="number"
+            class="form-control form-control-lg rounded-3"
+            formControlName="seuilAlerte"
+            placeholder="Ex: 10"
+          />
+
+          @if (produitForm.get('seuilAlerte')?.invalid && produitForm.get('seuilAlerte')?.touched) {
+            <small class="text-danger"> Seuil obligatoire </small>
+          }
+        </div>
+
+        <!-- ================= BUTTON ================= -->
+
+        <button
+          class="btn btn-primary btn-lg w-100 shadow-sm rounded-3"
+          type="submit"
+          [disabled]="data?.action === 'view'"
+        >
+          💾 Enregistrer
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

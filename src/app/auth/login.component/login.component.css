@@ -1,0 +1,36 @@
+
+      .login-container {
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .login-card {
+        width: 900px;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+      }
+
+      .login-image {
+        background: url('https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d') center/cover;
+        min-height: 500px;
+      }
+
+      .login-form {
+        background: white;
+        padding: 40px;
+      }
+
+      .title {
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+
+      .subtitle {
+        color: gray;
+        font-size: 14px;
+        margin-bottom: 25px;
+      }
+    

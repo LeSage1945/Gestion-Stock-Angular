@@ -1,0 +1,11 @@
+<div class="sidebar">
+  <h4 class="text-center text-white py-3">🚬 Stock App</h4>
+
+  <!-- 🚨 ABONNEMENT BLOQUÉ -->
+  <div *ngIf="isBlocked" class="alert alert-danger m-2">Abonnement expiré 🚫</div>
+
+  <!-- MENU -->
+  <a *ngFor="let item of filteredMenu" [routerLink]="item.route">
+    {{ item.label }}
+  </a>
+</div>

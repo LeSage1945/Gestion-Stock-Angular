@@ -1,0 +1,55 @@
+<div class="modal fade show d-block" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <!-- HEADER -->
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">📦 Détail produit</h5>
+        <button class="btn-close btn-close-white" (click)="close()"></button>
+      </div>
+
+      <!-- BODY -->
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="text-muted">Nom</label>
+          <p class="fw-bold mb-0">{{ data.nom }}</p>
+        </div>
+
+        <div class="mb-3">
+          <label class="text-muted">Marque</label>
+          <p class="fw-bold mb-0">{{ data.marque }}</p>
+        </div>
+
+        <div class="mb-3">
+          <label class="text-muted">Stock actuel</label>
+          <p class="fw-bold mb-0">
+            <span class="badge bg-info text-dark">
+              {{ data.stockActuel }}
+            </span>
+          </p>
+        </div>
+
+        <div class="mb-3">
+          <label class="text-muted">Entrées</label>
+          <p class="fw-bold mb-0 text-success">+ {{ data.entrees }}</p>
+        </div>
+
+        <div class="mb-3">
+          <label class="text-muted">Sorties</label>
+          <p class="fw-bold mb-0 text-danger">- {{ data.sorties }}</p>
+        </div>
+
+        <div class="mb-3">
+          <label class="text-muted">Seuil d’alerte</label>
+          <p class="fw-bold mb-0">
+            {{ data.seuilAlerte }}
+          </p>
+        </div>
+      </div>
+
+      <!-- FOOTER -->
+      <div class="modal-footer">
+        <button class="btn btn-outline-secondary" (click)="close()">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>

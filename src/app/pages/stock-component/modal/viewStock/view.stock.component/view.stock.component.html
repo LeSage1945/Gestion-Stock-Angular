@@ -1,0 +1,70 @@
+<div class="modal fade show d-block" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <!-- HEADER -->
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title">📦 Détail du produit</h5>
+        <button class="btn-close btn-close-white" (click)="close()"></button>
+      </div>
+
+      <!-- BODY -->
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="fw-bold text-muted">Nom</label>
+          <div class="p-2 border rounded bg-light">
+            {{ data.nom }}
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="fw-bold text-muted">Marque</label>
+          <div class="p-2 border rounded bg-light">
+            {{ data.marque }}
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="fw-bold text-muted">Stock actuel</label>
+          <div class="p-2 border rounded bg-light fw-bold">
+            {{ data.stockActuel }}
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-6 mb-3">
+            <label class="fw-bold text-muted">Entrées</label>
+            <div class="p-2 border rounded bg-light text-success fw-bold">+ {{ data.entrees }}</div>
+          </div>
+
+          <div class="col-6 mb-3">
+            <label class="fw-bold text-muted">Sorties</label>
+            <div class="p-2 border rounded bg-light text-danger fw-bold">- {{ data.sorties }}</div>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="fw-bold text-muted">Seuil d'alerte</label>
+          <div class="p-2 border rounded bg-light">
+            {{ data.seuilAlerte }}
+          </div>
+        </div>
+
+        <!-- STATUT -->
+        <div class="text-center mt-3">
+          @if (data.stockActuel > data.seuilAlerte) {
+            <span class="badge bg-success fs-6 px-3 py-2">🟢 Stock OK</span>
+          } @else if (data.stockActuel > 0) {
+            <span class="badge bg-warning text-dark fs-6 px-3 py-2">🟡 Stock faible</span>
+          } @else {
+            <span class="badge bg-danger fs-6 px-3 py-2">🔴 Rupture</span>
+          }
+        </div>
+      </div>
+
+      <!-- FOOTER -->
+      <div class="modal-footer">
+        <button class="btn btn-outline-secondary" (click)="close()">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>

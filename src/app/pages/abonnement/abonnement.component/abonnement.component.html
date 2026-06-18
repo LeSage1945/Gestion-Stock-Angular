@@ -1,0 +1,148 @@
+<div class="container-fluid pt-4 px-4" style="background-color: #f8f9fa; min-height: 100vh">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h3 class="fw-bold text-dark m-0">Gestion des abonnements</h3>
+      <small class="text-muted">Suivez, activez et coupez les accès des comptes clients</small>
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <small class="text-muted fw-semibold">{{ comptes().length }} compte(s) au total</small>
+  </div>
+
+  <div class="table-responsive">
+    <table
+      class="table table-borderless align-middle"
+      style="border-collapse: separate; border-spacing: 0 12px"
+    >
+      <thead>
+        <tr style="background-color: #1c2229 !important; color: #ffffff !important">
+          <th
+            class="py-3 px-4 fw-bold"
+            style="
+              border-top-left-radius: 4px;
+              border-bottom-left-radius: 4px;
+              background-color: #1c2229 !important;
+              color: white;
+            "
+          >
+            Nom du Client
+          </th>
+          <th class="py-3 fw-bold" style="background-color: #1c2229 !important; color: white">
+            Code
+          </th>
+          <th class="py-3 fw-bold" style="background-color: #1c2229 !important; color: white">
+            Statut
+          </th>
+          <th class="py-3 fw-bold" style="background-color: #1c2229 !important; color: white">
+            Échéance
+          </th>
+          <th
+            class="py-3 text-end px-4 fw-bold"
+            style="
+              border-top-right-radius: 4px;
+              border-bottom-right-radius: 4px;
+              background-color: #1c2229 !important;
+              color: white;
+            "
+          >
+            Actions
+          </th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let c of comptes()" class="bg-white shadow-sm" style="border-radius: 4px">
+          <td
+            class="py-3 px-4 fw-bold text-dark"
+            style="border-top-left-radius: 4px; border-bottom-left-radius: 4px"
+          >
+            {{ c.nom }}
+          </td>
+
+          <td class="py-3">
+            <span
+              class="badge bg-secondary px-2 py-2 fw-semibold"
+              style="background-color: #6c757d !important; color: #ffffff"
+            >
+              {{ c.code }}
+            </span>
+          </td>
+
+          <td class="py-3">
+            <span
+              *ngIf="c.abonnement?.statut === 'ACTIF'"
+              class="badge bg-success px-3 py-2 fw-bold d-inline-flex align-items-center"
+              style="background-color: #198754 !important; color: #ffffff; border-radius: 20px"
+            >
+              <span class="me-1">✔</span> Actif
+            </span>
+            <span
+              *ngIf="c.abonnement?.statut !== 'ACTIF'"
+              class="badge bg-danger px-3 py-2 fw-bold d-inline-flex align-items-center"
+              style="background-color: #dc3545 !important; color: #ffffff; border-radius: 20px"
+            >
+              <span class="me-1">✕</span> Inactif
+            </span>
+          </td>
+
+          <td class="py-3 fw-semibold text-secondary">
+            <span *ngIf="c.abonnement?.fin">
+              {{ c.abonnement.fin | date: 'dd/MM/yyyy' }}
+            </span>
+            <span *ngIf="!c.abonnement?.fin" class="text-muted italic small">
+              Aucun abonnement
+            </span>
+          </td>
+
+          <td
+            class="py-3 text-end px-4"
+            style="border-top-right-radius: 4px; border-bottom-right-radius: 4px"
+          >
+            <div class="d-flex justify-content-end align-items-center gap-2">
+              <button
+                *ngIf="c.abonnement?.statut !== 'ACTIF'"
+                class="btn btn-success fw-bold px-3 py-2 shadow-sm"
+                style="
+                  background-color: #198754;
+                  border: none;
+                  font-size: 0.85rem;
+                  border-radius: 6px;
+                "
+                (click)="activer(c.id)"
+                [disabled]="loading()"
+              >
+                ⚡ Activer
+              </button>
+
+              <ng-container *ngIf="c.abonnement?.statut === 'ACTIF'">
+                <button
+                  class="btn btn-outline-success fw-bold px-3 py-2 shadow-sm"
+                  style="font-size: 0.85rem; border-radius: 6px"
+                  (click)="activer(c.id)"
+                  [disabled]="loading()"
+                >
+                  🔄 Prolonger
+                </button>
+
+                <button
+                  class="btn btn-danger fw-bold px-3 py-2 shadow-sm"
+                  style="
+                    background-color: #dc3545;
+                    border: none;
+                    font-size: 0.85rem;
+                    border-radius: 6px;
+                  "
+                  (click)="desactiver(c.id)"
+                  [disabled]="loading()"
+                >
+                  ✕ Désactiver
+                </button>
+              </ng-container>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

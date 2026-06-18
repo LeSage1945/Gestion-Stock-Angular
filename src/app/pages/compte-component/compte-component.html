@@ -1,0 +1,129 @@
+<div class="dashboard-content">
+  <div class="page-header d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="page-title d-flex align-items-center gap-2">
+        <span>📁</span> Gestion des Comptes
+      </h2>
+      <p class="text-muted m-0">Suivi et configuration via Angular Signals</p>
+    </div>
+  </div>
+
+  <div class="card mb-4 shadow-sm border-0 grid-card">
+    <div class="card-body">
+      <h4 class="card-title mb-3">
+        @if (compteForm().id) {
+          Modifier le compte ({{ compteForm().code }})
+        } @else {
+          Ajouter un nouveau compte
+        }
+      </h4>
+
+      <form (submit)="$event.preventDefault()">
+        <div class="row g-3">
+          <div class="col-md-5">
+            <label class="form-label text-muted small fw-bold">Code du compte</label>
+            <input
+              type="text"
+              class="form-control text-uppercase"
+              [value]="compteForm().code"
+              (input)="updateCodeField($any($event.target).value)"
+              placeholder="Ex: CPT-001"
+            />
+          </div>
+          <div class="col-md-5">
+            <label class="form-label text-muted small fw-bold">Nom du compte</label>
+            <input
+              type="text"
+              class="form-control"
+              [value]="compteForm().nom"
+              (input)="updateNomField($any($event.target).value)"
+              placeholder="Ex: Caisse Principale"
+            />
+          </div>
+          <div class="col-md-2 d-flex align-items-end gap-2">
+            @if (compteForm().id) {
+              <button
+                type="button"
+                class="btn btn-success w-100"
+                (click)="updateCompte(compteForm().id!)"
+              >
+                Modifier
+              </button>
+              <button
+                type="button"
+                class="btn btn-light border w-100"
+                (click)="annulerModification()"
+              >
+                Annuler
+              </button>
+            } @else {
+              <button type="button" class="btn btn-primary btn-add w-100" (click)="createCompte()">
+                Enregistrer
+              </button>
+            }
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0 grid-card">
+    <div class="card-body p-0">
+      <div class="p-3 border-bottom d-flex align-items-center gap-2">
+        <span>📋</span> <strong class="table-section-title">Liste des comptes</strong>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 custom-table">
+          <thead>
+            <tr>
+              <th scope="col">Code</th>
+              <th scope="col">Nom du Compte</th>
+              <th scope="col">Créé le</th>
+              <th scope="col" class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of comptes(); track item.id) {
+              <tr>
+                <td class="fw-bold">{{ item.code }}</td>
+                <td>{{ item.nom }}</td>
+                <td class="text-muted">
+                  @if (item.creeLe) {
+                    {{ item.creeLe | date: 'dd/MM/yyyy HH:mm' }}
+                  } @else {
+                    --
+                  }
+                </td>
+                <td class="text-end">
+                  <div class="d-flex justify-content-end gap-2 pe-2">
+                    @if (item.id) {
+                      <button
+                        class="btn btn-action btn-edit-item"
+                        title="Modifier"
+                        (click)="getCompte(item.id)"
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        class="btn btn-action btn-delete-item"
+                        title="Supprimer"
+                        (click)="deleteCompte(item.id)"
+                      >
+                        🗑️
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4" class="text-center py-4 text-muted">Aucun compte trouvé.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

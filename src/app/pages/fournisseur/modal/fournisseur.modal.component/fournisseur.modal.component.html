@@ -1,0 +1,76 @@
+<div class="container-fluid p-4">
+  <!-- ================= HEADER ================= -->
+
+  <div class="mb-4">
+    <h3 class="fw-bold mb-1">➕ Ajouter un fournisseur</h3>
+
+    <p class="text-muted mb-0">Remplissez les informations du fournisseur</p>
+  </div>
+
+  <!-- ================= CARD FORM ================= -->
+
+  <div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-4">
+      <form [formGroup]="fournisseurForm" (ngSubmit)="onSubmit()">
+        <!-- ================= NOM ================= -->
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold"> Nom </label>
+
+          <input
+            type="text"
+            class="form-control form-control-lg rounded-3"
+            formControlName="nom"
+            placeholder="Ex: Société ABC"
+          />
+
+          @if (fournisseurForm.get('nom')?.invalid && fournisseurForm.get('nom')?.touched) {
+            <small class="text-danger"> Nom obligatoire </small>
+          }
+        </div>
+
+        <!-- ================= ADRESSE ================= -->
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold"> Adresse </label>
+
+          <input
+            type="text"
+            class="form-control form-control-lg rounded-3"
+            formControlName="adresse"
+            placeholder="Ex: Pointe-Noire"
+          />
+        </div>
+
+        <!-- ================= TELEPHONE ================= -->
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold"> Téléphone </label>
+
+          <input
+            type="text"
+            class="form-control form-control-lg rounded-3"
+            formControlName="telephone"
+            placeholder="+242..."
+          />
+
+          @if (
+            fournisseurForm.get('telephone')?.invalid && fournisseurForm.get('telephone')?.touched
+          ) {
+            <small class="text-danger"> Téléphone obligatoire </small>
+          }
+        </div>
+
+        <!-- ================= BUTTON ================= -->
+
+        <button
+          class="btn btn-primary btn-lg w-100 shadow-sm rounded-3"
+          type="submit"
+          [disabled]="data.action === 'view'"
+        >
+          💾 Enregistrer
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

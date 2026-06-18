@@ -1,0 +1,290 @@
+<div class="container-fluid">
+  <!-- ================= LOADER ================= -->
+  @if (isLoading()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status"></div>
+      <p class="mt-2 text-muted">Chargement des données...</p>
+    </div>
+  }
+
+  <!-- ================= ERREUR ================= -->
+  @if (erreur()) {
+    <div class="alert alert-danger">{{ erreur() }}</div>
+  }
+
+  <!-- ================= CONTENU ================= -->
+  @if (!isLoading() && !erreur()) {
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h3 class="fw-bold mb-1">📊 Rapports & Analyses</h3>
+        <p class="text-muted mb-0">Vue globale des performances de vente et stock</p>
+      </div>
+      <button class="btn btn-dark" (click)="exporterPDF()">
+        <i class="bi bi-download me-2"></i>Exporter PDF
+      </button>
+    </div>
+
+    <!-- ================= FILTRES PAR DATE ================= -->
+    <div class="d-flex gap-2 mb-4 flex-wrap">
+      <button
+        class="btn btn-sm rounded-pill px-3"
+        [class.btn-dark]="filtre() === 'tout'"
+        [class.btn-outline-secondary]="filtre() !== 'tout'"
+        (click)="setFiltre('tout')"
+      >
+        Tout
+      </button>
+      <button
+        class="btn btn-sm rounded-pill px-3"
+        [class.btn-dark]="filtre() === 'aujourd_hui'"
+        [class.btn-outline-secondary]="filtre() !== 'aujourd_hui'"
+        (click)="setFiltre('aujourd_hui')"
+      >
+        Aujourd'hui
+      </button>
+      <button
+        class="btn btn-sm rounded-pill px-3"
+        [class.btn-dark]="filtre() === 'semaine'"
+        [class.btn-outline-secondary]="filtre() !== 'semaine'"
+        (click)="setFiltre('semaine')"
+      >
+        7 derniers jours
+      </button>
+      <button
+        class="btn btn-sm rounded-pill px-3"
+        [class.btn-dark]="filtre() === 'mois'"
+        [class.btn-outline-secondary]="filtre() !== 'mois'"
+        (click)="setFiltre('mois')"
+      >
+        Ce mois
+      </button>
+
+      <span class="ms-auto text-muted small align-self-center">
+        Période : <strong>{{ getLabelFiltre() }}</strong> — {{ ventesFiltrees().length }} vente(s)
+      </span>
+    </div>
+
+    <!-- ================= STATS CARDS ================= -->
+    <div class="row g-4 mb-4">
+      <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-primary text-white rounded-4">
+          <div class="card-body">
+            <h6 class="text-uppercase opacity-75">Total Produits Vendus</h6>
+            <h2 class="fw-bold mb-0">{{ totalProduitsVendus() }}</h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-success text-white rounded-4">
+          <div class="card-body">
+            <h6 class="text-uppercase opacity-75">Chiffre d'affaires</h6>
+            <h2 class="fw-bold mb-0">{{ formatMontant(chiffreAffaires()) }}</h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-warning text-dark rounded-4">
+          <div class="card-body">
+            <h6 class="text-uppercase opacity-75">Stock restant</h6>
+            <h2 class="fw-bold mb-0">{{ stockRestant() }}</h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-danger text-white rounded-4">
+          <div class="card-body">
+            <h6 class="text-uppercase opacity-75">Alertes</h6>
+            <h2 class="fw-bold mb-0">{{ nombreAlertes() }}</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= GRAPHIQUES ================= -->
+    @if (ventesFiltrees().length > 0) {
+      <div class="row g-4 mb-4">
+        <!-- LINE CHART : CA par jour -->
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-body p-4">
+              <h5 class="fw-bold mb-1">
+                <i class="bi bi-graph-up-arrow me-2 text-success"></i>
+                Évolution du chiffre d'affaires
+              </h5>
+              <p class="text-muted small mb-3">Par jour — {{ getLabelFiltre() }}</p>
+              <div style="height: 280px">
+                <canvas
+                  baseChart
+                  [data]="lineChartData"
+                  [options]="lineChartOptions"
+                  [type]="'line'"
+                ></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BAR CHART : Ventes par produit -->
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-body p-4">
+              <h5 class="fw-bold mb-1">
+                <i class="bi bi-bar-chart-fill me-2 text-primary"></i>
+                Produits les plus vendus
+              </h5>
+              <p class="text-muted small mb-3">Quantités vendues — {{ getLabelFiltre() }}</p>
+              <div style="height: 280px">
+                <canvas
+                  baseChart
+                  [data]="barChartData"
+                  [options]="barChartOptions"
+                  [type]="'bar'"
+                ></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    } @else {
+      <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body text-center py-5 text-muted">
+          <i class="bi bi-bar-chart fs-1 d-block mb-2"></i>
+          Aucune donnée pour afficher les graphiques.
+        </div>
+      </div>
+    }
+
+    <!-- ================= HISTORIQUE VENTES ================= -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+          <div>
+            <h5 class="fw-bold mb-1">📅 Historique des ventes</h5>
+            <p class="text-muted mb-0">{{ getLabelFiltre() }}</p>
+          </div>
+
+          <div class="input-group" style="max-width: 320px">
+            <span class="input-group-text bg-white border-end-0">
+              <i class="bi bi-search text-muted"></i>
+            </span>
+            <input
+              type="text"
+              class="form-control border-start-0 ps-0"
+              placeholder="Rechercher vendeur, produit, montant..."
+              [ngModel]="recherche()"
+              (ngModelChange)="onRecherche($event)"
+            />
+            @if (recherche()) {
+              <button
+                class="btn btn-outline-secondary border-start-0"
+                type="button"
+                (click)="onRecherche('')"
+              >
+                <i class="bi bi-x"></i>
+              </button>
+            }
+          </div>
+        </div>
+
+        @if (recherche()) {
+          <p class="text-muted small mb-2">
+            <i class="bi bi-funnel me-1"></i>
+            {{ ventesAffichees().length }} résultat(s) pour
+            <strong>"{{ recherche() }}"</strong>
+          </p>
+        }
+
+        @if (ventesAffichees().length === 0) {
+          <div class="text-center text-muted py-4">
+            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+            @if (recherche()) {
+              Aucun résultat pour "{{ recherche() }}".
+            } @else {
+              Aucune vente pour cette période.
+            }
+          </div>
+        } @else {
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead class="table-dark">
+                <tr>
+                  <th>Date</th>
+                  <th>Vendeur</th>
+                  <th>Produits</th>
+                  <th>Qté</th>
+                  <th>Total</th>
+                  <th>Paiement</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (vente of ventesAffichees(); track vente.id) {
+                  <tr>
+                    <td>{{ formatDate(vente.creeLe) }}</td>
+                    <td>{{ vente.utilisateur.nom }}</td>
+                    <td class="fw-semibold">{{ getProduits(vente) }}</td>
+                    <td>{{ getQuantiteTotale(vente) }}</td>
+                    <td>
+                      <span class="badge bg-success">{{ formatMontant(vente.montantTotal) }}</span>
+                    </td>
+                    <td>
+                      @for (p of vente.paiements; track p.montant) {
+                        <span class="badge bg-secondary me-1">{{ p.methodePaiement }}</span>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- ================= ETAT DES STOCKS ================= -->
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="card-body p-4">
+        <div class="mb-3">
+          <h5 class="fw-bold mb-1">📦 État des stocks</h5>
+          <p class="text-muted mb-0">Stock actuel par produit</p>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead class="table-dark">
+              <tr>
+                <th>Produit</th>
+                <th>Marque</th>
+                <th>Entrées</th>
+                <th>Ventes</th>
+                <th>Sorties</th>
+                <th>Stock actuel</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (s of stocks(); track s.produitId) {
+                <tr>
+                  <td class="fw-semibold">{{ s.nom }}</td>
+                  <td>{{ s.marque }}</td>
+                  <td>{{ s.entrees }}</td>
+                  <td>{{ s.ventes }}</td>
+                  <td>{{ s.sorties }}</td>
+                  <td>{{ s.stockActuel }}</td>
+                  <td>
+                    <span
+                      class="badge"
+                      [class.bg-danger]="isEnAlerte(s)"
+                      [class.bg-success]="!isEnAlerte(s)"
+                    >
+                      {{ isEnAlerte(s) ? '⚠️ Alerte' : '✅ OK' }}
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  }
+</div>
