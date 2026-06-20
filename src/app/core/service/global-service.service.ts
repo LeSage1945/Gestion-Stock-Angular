@@ -2,7 +2,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../../../environments/environment';
-
+import { catchError } from 'rxjs/operators';
+import { throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -19,7 +20,6 @@ export class GlobalServiceService {
 
     let headers = customHeaders || new HttpHeaders();
 
-    // 🔥 protection totale contre SSR / undefined
     if (typeof window !== 'undefined' && window.localStorage) {
 
       const token = window.localStorage.getItem('token');
@@ -30,6 +30,25 @@ export class GlobalServiceService {
     }
 
     return headers;
+  }
+
+  // 🔥 GESTION CENTRALISÉE DES ERREURS
+  private handleError(error: any) {
+    let message = 'Une erreur est survenue, veuillez réessayer';
+
+    if (error?.error?.message) {
+      message = Array.isArray(error.error.message)
+        ? error.error.message.join('\n')
+        : error.error.message;
+    } else if (error?.message) {
+      message = error.message;
+    }
+
+    if (typeof window !== 'undefined') {
+      alert(message);
+    }
+
+    return throwError(() => error);
   }
 
   request<T>(
@@ -48,7 +67,7 @@ export class GlobalServiceService {
       case 'GET':
         return this.httpClient.get<T>(fullUrl, {
           headers: finalHeaders
-        });
+        }).pipe(catchError((error) => this.handleError(error)));
 
       case 'POST':
         return this.httpClient.post<T>(
@@ -57,7 +76,7 @@ export class GlobalServiceService {
           {
             headers: finalHeaders
           }
-        );
+        ).pipe(catchError((error) => this.handleError(error)));
 
       case 'PUT':
         return this.httpClient.put<T>(
@@ -66,7 +85,7 @@ export class GlobalServiceService {
           {
             headers: finalHeaders
           }
-        );
+        ).pipe(catchError((error) => this.handleError(error)));
 
       case 'DELETE':
         return this.httpClient.delete<T>(
@@ -74,7 +93,7 @@ export class GlobalServiceService {
           {
             headers: finalHeaders
           }
-        );
+        ).pipe(catchError((error) => this.handleError(error)));
 
       default:
         throw new Error('Méthode HTTP non supportée');
