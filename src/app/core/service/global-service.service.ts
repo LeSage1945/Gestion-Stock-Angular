@@ -1,6 +1,8 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { environment } from '../../../environments/environment';
+
 
 @Injectable({
   providedIn: 'root',
@@ -10,25 +12,25 @@ export class GlobalServiceService {
   private httpClient = inject(HttpClient);
   private platformId = inject(PLATFORM_ID);
 
-  private baseUrl = 'http://localhost:3000/';
+  private baseUrl = environment.apiUrl;
 
   // 🔥 AJOUT AUTOMATIQUE DU TOKEN
-private getHeaders(customHeaders?: HttpHeaders): HttpHeaders {
+  private getHeaders(customHeaders?: HttpHeaders): HttpHeaders {
 
-  let headers = customHeaders || new HttpHeaders();
+    let headers = customHeaders || new HttpHeaders();
 
-  // 🔥 protection totale contre SSR / undefined
-  if (typeof window !== 'undefined' && window.localStorage) {
+    // 🔥 protection totale contre SSR / undefined
+    if (typeof window !== 'undefined' && window.localStorage) {
 
-    const token = window.localStorage.getItem('token');
+      const token = window.localStorage.getItem('token');
 
-    if (token) {
-      headers = headers.set('Authorization', `Bearer ${token}`);
+      if (token) {
+        headers = headers.set('Authorization', `Bearer ${token}`);
+      }
     }
-  }
 
-  return headers;
-}
+    return headers;
+  }
 
   request<T>(
     url: string,
