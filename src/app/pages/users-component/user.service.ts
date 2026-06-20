@@ -31,6 +31,7 @@ export class UserService {
 
   // ================= DELETE =================
   deleteUser(id: string): Observable<any> {
+    console.log(id)
     return this.api.request(`utilisateur/delete/user/${id}`, 'DELETE');
   }
 

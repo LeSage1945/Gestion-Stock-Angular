@@ -77,11 +77,16 @@ export class AdminUserComponent {
   }
 
   deleteUser(id: string): void {
-    if (confirm('Supprimer cet administrateur ?')) {
-      this.utilisateurService.deleteUser(id).subscribe({
-        next: () => this.loadInitialData(),
-        error: (err) => console.error(err)
-      });
-    }
+  if (confirm('Supprimer cet administrateur ?')) {
+    this.utilisateurService.deleteUser(id).subscribe({
+      next: (data) => {
+        console.log(data);
+        this.loadInitialData();
+      },
+      error: (err) => {
+        console.error(err);
+      }
+    });
   }
+}
 }
