@@ -19,7 +19,7 @@ export class SidebarComponent {
 
   menu = [
     {
-      label: 'Dashboard',
+      label: 'Tableau de bord',
       route: '/dashboard',
       roles: ['SUPER_ADMIN', 'ADMIN', 'VENDEUR', 'CAISSIER'],
       premium: false
@@ -31,49 +31,49 @@ export class SidebarComponent {
       premium: false
     },
     {
-      label: 'Stock',
+      label: 'Stocks',
       route: '/stock',
       roles: ['SUPER_ADMIN', 'ADMIN', 'VENDEUR'],
       premium: false
     },
     {
-      label: 'Users',
+      label: 'Utilisateurs',
       route: '/users',
       roles: ['SUPER_ADMIN', 'ADMIN'],
       premium: false
     },
     {
-      label: 'Reports',
+      label: 'Rapports',
       route: '/reports',
       roles: ['SUPER_ADMIN', 'ADMIN'],
       premium: false
     },
     {
-      label: 'Sales',
+      label: 'Ventes',
       route: '/sales',
       roles: ['SUPER_ADMIN', 'ADMIN', 'CAISSIER'],
       premium: false
     },
     {
-      label: 'Settings',
+      label: 'Paramètres',
       route: '/settings',
       roles: ['SUPER_ADMIN', 'ADMIN'],
       premium: false
     },
     {
-      label: 'Compte',
+      label: 'Comptes',
       route: '/compte',
       roles: ['SUPER_ADMIN'],
       premium: false
     },
     {
-      label: 'AdminUsers',
+      label: 'Utilisateurs admin',
       route: '/admin-users',
       roles: ['SUPER_ADMIN'],
       premium: false
     },
     {
-      label: 'Abonnement',
+      label: 'Abonnements',
       route: '/abonnement',
       roles: ['SUPER_ADMIN'],
       premium: false

@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CompteService } from '../compte-component/compte.service';
 import { ICompte } from '../compte-component/model/compte.model';
 import { UserService } from '../users-component/user.service';
@@ -10,18 +10,16 @@ import { AdminUserService } from './admin-user.service';
   templateUrl: './admin-user-component.html',
   styleUrl: './admin-user-component.css',
 })
-export class AdminUserComponent {
+export class AdminUserComponent implements OnInit {
   private utilisateurService = inject(UserService);
   private AdminUserService = inject(AdminUserService);
   private compteService = inject(CompteService);
 
-  utilisateurs = signal<any[]>([]); // Liste des admins
-  comptes = signal<ICompte[]>([]);  // Liste des comptes pour le Select
-
-  // ID du compte sélectionné dans le Dropdown
+  utilisateurs = signal<any[]>([]);
+  comptes = signal<ICompte[]>([]);
   selectedCompteId = signal<string>('');
+  erreurs = signal<Record<string, string>>({});
 
-  // Objet DTO pour le formulaire
   userForm = signal({
     nom: '',
     email: '',
@@ -34,13 +32,10 @@ export class AdminUserComponent {
   }
 
   loadInitialData(): void {
-    // 1. Charger les comptes pour remplir le Select
     this.compteService.getAllCompte().subscribe({
       next: (res) => this.comptes.set(res),
       error: (err) => console.error(err)
     });
-
-    // 2. Charger les utilisateurs pour le tableau
     this.AdminUserService.getAllUsers().subscribe({
       next: (res) => this.utilisateurs.set(res),
       error: (err) => console.error(err)
@@ -49,44 +44,72 @@ export class AdminUserComponent {
 
   updateField(field: string, value: string): void {
     this.userForm.update(state => ({ ...state, [field]: value }));
+    // Valider le champ en temps réel
+    this.validerChamp(field, value);
+  }
+
+  validerChamp(field: string, value: string): void {
+    const errs = { ...this.erreurs() };
+
+    if (field === 'nom') {
+      if (!value.trim()) errs['nom'] = 'Le nom est obligatoire';
+      else if (value.length > 50) errs['nom'] = 'Maximum 50 caractères';
+      else delete errs['nom'];
+    }
+
+    if (field === 'email') {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!value.trim()) errs['email'] = "L'email est obligatoire";
+      else if (!emailRegex.test(value)) errs['email'] = 'Email invalide';
+      else delete errs['email'];
+    }
+
+    if (field === 'motDePasse') {
+      const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)/;
+      if (!value) errs['motDePasse'] = 'Le mot de passe est obligatoire';
+      else if (value.length < 6) errs['motDePasse'] = 'Minimum 6 caractères';
+      else if (!passwordRegex.test(value)) errs['motDePasse'] = 'Doit contenir au moins une lettre et un chiffre';
+      else delete errs['motDePasse'];
+    }
+
+    this.erreurs.set(errs);
+  }
+
+  private validerTout(): boolean {
+    const f = this.userForm();
+    this.validerChamp('nom', f.nom);
+    this.validerChamp('email', f.email);
+    this.validerChamp('motDePasse', f.motDePasse);
+
+    if (!this.selectedCompteId()) {
+      this.erreurs.update(e => ({ ...e, compte: 'Veuillez sélectionner un compte' }));
+    } else {
+      this.erreurs.update(e => { const { compte, ...rest } = e; return rest; });
+    }
+
+    return Object.keys(this.erreurs()).length === 0;
   }
 
   createUserWithAccount(): void {
-    const dto = this.userForm();
-    const compteId = this.selectedCompteId();
+    if (!this.validerTout()) return;
 
-    if (!dto.nom || !dto.email || !dto.motDePasse || !compteId) {
-      alert('Veuillez remplir tous les champs et sélectionner un compte.');
-      return;
-    }
-
-    this.utilisateurService.createWithAccount(dto, compteId).subscribe({
+    this.utilisateurService.createWithAccount(this.userForm(), this.selectedCompteId()).subscribe({
       next: () => {
-        alert('Utilisateur ADMIN créé avec succès !');
-        this.loadInitialData();
-        this.userForm.set({
-          nom: '',
-          email: '',
-          motDePasse: '',
-          role: 'ADMIN'
-        });
+        this.userForm.set({ nom: '', email: '', motDePasse: '', role: 'ADMIN' });
         this.selectedCompteId.set('');
+        this.erreurs.set({});
+        this.loadInitialData();
       },
       error: (err) => console.error(err)
     });
   }
 
   deleteUser(id: string): void {
-  if (confirm('Supprimer cet administrateur ?')) {
-    this.utilisateurService.deleteUser(id).subscribe({
-      next: (data) => {
-        console.log(data);
-        this.loadInitialData();
-      },
-      error: (err) => {
-        console.error(err);
-      }
-    });
+    if (confirm('Supprimer cet administrateur ?')) {
+      this.utilisateurService.deleteUser(id).subscribe({
+        next: () => this.loadInitialData(),
+        error: (err) => console.error(err)
+      });
+    }
   }
-}
 }

@@ -14,43 +14,60 @@
 
       <form (submit)="$event.preventDefault()">
         <div class="row g-3">
+          <!-- Exemple pour le champ nom -->
           <div class="col-md-3">
             <label class="form-label text-muted small fw-bold">Nom complet</label>
             <input
               type="text"
               class="form-control"
+              [class.is-invalid]="erreurs()['nom']"
               [value]="userForm().nom"
               (input)="updateField('nom', $any($event.target).value)"
               placeholder="Ex: Jean Dupont"
             />
+            @if (erreurs()['nom']) {
+              <div class="invalid-feedback">{{ erreurs()['nom'] }}</div>
+            }
           </div>
 
+          <!-- Champ email -->
           <div class="col-md-3">
             <label class="form-label text-muted small fw-bold">Adresse Email</label>
             <input
               type="email"
               class="form-control"
+              [class.is-invalid]="erreurs()['email']"
               [value]="userForm().email"
               (input)="updateField('email', $any($event.target).value)"
               placeholder="jean.dupont@example.com"
             />
+            @if (erreurs()['email']) {
+              <div class="invalid-feedback">{{ erreurs()['email'] }}</div>
+            }
           </div>
 
+          <!-- Champ mot de passe -->
           <div class="col-md-3">
             <label class="form-label text-muted small fw-bold">Mot de passe</label>
             <input
               type="password"
               class="form-control"
+              [class.is-invalid]="erreurs()['motDePasse']"
               [value]="userForm().motDePasse"
               (input)="updateField('motDePasse', $any($event.target).value)"
               placeholder="••••••••"
             />
+            @if (erreurs()['motDePasse']) {
+              <div class="invalid-feedback">{{ erreurs()['motDePasse'] }}</div>
+            }
           </div>
 
+          <!-- Select compte -->
           <div class="col-md-3">
             <label class="form-label text-muted small fw-bold">Affecter à un Compte</label>
             <select
               class="form-select select-custom"
+              [class.is-invalid]="erreurs()['compte']"
               [value]="selectedCompteId()"
               (change)="selectedCompteId.set($any($event.target).value)"
             >
@@ -59,6 +76,9 @@
                 <option [value]="c.id">{{ c.code }} - {{ c.nom }}</option>
               }
             </select>
+            @if (erreurs()['compte']) {
+              <div class="invalid-feedback">{{ erreurs()['compte'] }}</div>
+            }
           </div>
 
           <div class="col-12 d-flex justify-content-end mt-3">

@@ -20,7 +20,7 @@ export class ModalUserComponent implements OnInit {
     email: new FormControl('', [Validators.email, Validators.required]),
     motDePasse: new FormControl('', [Validators.minLength(6)]),
     role: new FormControl('CAISSIER', [Validators.required]),
-    active: new FormControl(true)
+    // active: new FormControl(true)
   })
 
   ngOnInit(): void {
@@ -28,7 +28,7 @@ export class ModalUserComponent implements OnInit {
       this.userForm.patchValue(this.data.data)
 
       if (this.data.action === 'view') {
-         this.userForm.disable();
+        this.userForm.disable();
       }
 
       if (this.data.action === 'update') {
@@ -37,16 +37,25 @@ export class ModalUserComponent implements OnInit {
     }
   }
 
+  // onSubmit() {
+  //   if (this.userForm.invalid) {
+  //     console.log('Formulaire invalide');
+  //     return;
+  //   }
+
+  //   console.log('Utilisateur :', this.userForm.value);
+
+  //   const user = this.userForm.value
+  //   this.dialogRef.close(user)
+  // }
+
   onSubmit() {
     if (this.userForm.invalid) {
       console.log('Formulaire invalide');
       return;
     }
 
-    console.log('Utilisateur :', this.userForm.value);
-
-    const user = this.userForm.value
-    this.dialogRef.close(user)
+    this.dialogRef.close(this.userForm.value);
   }
 
   close() {
