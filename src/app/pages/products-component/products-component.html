@@ -37,9 +37,9 @@
         <app-loader-component [isLoading]="isLoading()"> </app-loader-component>
       } @else {
         @if (produitFiltre().length > 0) {
-          <div class="table-responsive" style="height: 330px;">
+          <div class="table-responsive" style="height: 330px">
             <table class="table table-hover align-middle">
-              <thead class="table-dark" style="position: sticky; z-index: 10; top: 0; ">
+              <thead class="table-dark" style="position: sticky; z-index: 10; top: 0">
                 <tr>
                   <th>Nom</th>
 
@@ -80,7 +80,7 @@
 
                     <!-- DATE -->
                     <td>
-                      {{ elem.creeLe ? globalServiceService.formatDate(elem.creeLe) : '-' }}
+                      {{ elem.creeLe ? globalService.formatDate(elem.creeLe) : '-' }}
                     </td>
 
                     <!-- ACTIONS -->
