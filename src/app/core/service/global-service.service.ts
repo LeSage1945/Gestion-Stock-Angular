@@ -1,9 +1,10 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { inject, Injectable, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../../../environments/environment';
+import { inject, Injectable } from '@angular/core';
 import { catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
+import { AlertComponent } from '../alert-component/alert-component';
 
 @Injectable({
   providedIn: 'root',
@@ -11,7 +12,7 @@ import { throwError } from 'rxjs';
 export class GlobalServiceService {
 
   private httpClient = inject(HttpClient);
-  private platformId = inject(PLATFORM_ID);
+  private dialog = inject(MatDialog)
 
   private baseUrl = environment.apiUrl;
 
@@ -38,15 +39,14 @@ export class GlobalServiceService {
 
     if (error?.error?.message) {
       message = Array.isArray(error.error.message)
-        ? error.error.message.join('\n')
+        ? error.error.message.join('<br>')
         : error.error.message;
     } else if (error?.message) {
       message = error.message;
     }
 
-    if (typeof window !== 'undefined') {
-      alert(message);
-    }
+    // ✅ remplace alert() natif par ta dialog
+    this.alert(message, 'Erreur', 'danger', '', 'OK');
 
     return throwError(() => error);
   }
@@ -112,5 +112,48 @@ export class GlobalServiceService {
     const year = d.getFullYear();
 
     return `${day}${separator}${month}${separator}${year}`;
+  }
+
+  // alert(msg: string, title: string, type: "info" | "success" | "danger", btnCancel: string, btnOk: string, disableClose: boolean = false) {
+  //   const ref = this.dialog.open(AlertComponent, {
+  //     maxWidth: '500px',
+  //     disableClose: disableClose,
+  //     data: {
+  //       content: msg,
+  //       type: type,
+  //       buttonCancelName: btnCancel,
+  //       buttonOKName: btnOk,
+  //       title: title,
+  //     }
+  //   });
+  //   return ref;
+  // }
+
+  alert(
+    msg: string,
+    title: string,
+    type: 'info' | 'success' | 'danger',
+    btnCancel: string = '',
+    btnOk: string = 'OK',
+    disableClose: boolean = false
+  ) {
+    const ref = this.dialog.open(AlertComponent, {
+      maxWidth: '500px',
+      disableClose: disableClose,
+      data: {
+        content: msg,
+        type: type,
+        buttonCancelName: type === 'success' ? '' : btnCancel,
+        buttonOKName: type === 'success' ? '' : btnOk,  // ✅ pas de bouton si success
+        title: title,
+      }
+    });
+
+    // ✅ auto-fermeture après 2.5s si success
+    if (type === 'success') {
+      setTimeout(() => ref.close(), 1500);
+    }
+
+    return ref;
   }
 }

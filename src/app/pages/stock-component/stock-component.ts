@@ -7,6 +7,7 @@ import {
 } from '@angular/core';
 
 import { StockService } from './stock.service';
+import { GlobalServiceService } from './../../core/service/global-service.service';
 
 import { MatDialog } from '@angular/material/dialog';
 
@@ -23,163 +24,134 @@ import { SortieStockComponent } from './modal/sortiestock/sortie.stock.component
 export class StockComponent implements OnInit {
 
   // ===================== INJECT =====================
-
   private stockService = inject(StockService);
   private dialog = inject(MatDialog);
+  public globalService = inject(GlobalServiceService);
 
   // ===================== DATA =====================
-
   stockList = signal<any[]>([]);
-
   isLoading = signal(true);
 
-  // ===================== STATS (SIGNALS PRO) =====================
-
+  // ===================== STATS =====================
   totalStock = computed(() =>
-    this.stockList().reduce(
-      (sum, item) => sum + (item.stockActuel || 0),
-      0
-    )
+    this.stockList().reduce((sum, item) => sum + (item.stockActuel || 0), 0)
   );
 
   totalEntrees = computed(() =>
-    this.stockList().reduce(
-      (sum, item) => sum + (item.entrees || 0),
-      0
-    )
+    this.stockList().reduce((sum, item) => sum + (item.entrees || 0), 0)
   );
 
   totalSorties = computed(() =>
-    this.stockList().reduce(
-      (sum, item) => sum + (item.sorties || 0),
-      0
-    )
+    this.stockList().reduce((sum, item) => sum + (item.sorties || 0), 0)
   );
 
   // ===================== INIT =====================
-
   ngOnInit(): void {
     this.loadStock();
   }
 
   // ===================== LOAD STOCK =====================
-
   loadStock(): void {
-
     this.isLoading.set(true);
-
     this.stockService.getAllStocks().subscribe({
-
       next: (data: any[]) => {
-
-        console.log(data);
-
         this.stockList.set(data);
-
         this.isLoading.set(false);
-
       },
-
       error: (error) => {
-
-        console.log(error);
-
         this.isLoading.set(false);
-
+        this.globalService.alert(
+          error?.error?.message || 'Erreur lors du chargement du stock',
+          'Erreur',
+          'danger',
+          '',
+          'OK'
+        );
       }
-
     });
-
   }
 
   // ===================== VIEW =====================
-
   onView(data: any): void {
-
     this.dialog.open(ViewStockComponent, {
       width: '400px',
       data
     });
-
   }
 
   // ===================== ENTREE =====================
-  openEntreeModal(): void {
-    
-  }
+  openEntreeModal(): void { }
 
   onAddEntree(data: any): void {
-
-    const dialogRef =
-      this.dialog.open(EntreStockComponent, {
-        width: '500px',
-        data: { produit: data }
-      });
+    const dialogRef = this.dialog.open(EntreStockComponent, {
+      width: '500px',
+      data: { produit: data }
+    });
 
     dialogRef.afterClosed().subscribe(result => {
-
       if (!result) return;
 
       this.isLoading.set(true);
 
       this.stockService.addEntree(result).subscribe({
-
         next: () => {
-
+          this.globalService.alert(
+            'L\'entrée de stock a été enregistrée avec succès.',
+            'Entrée ajoutée ✅',
+            'success',
+            '',
+            'OK'
+          );
           this.loadStock();
-
         },
-
         error: (error) => {
-
-          console.log(error);
-
           this.isLoading.set(false);
-
+          this.globalService.alert(
+            error?.error?.message || 'Erreur lors de l\'ajout de l\'entrée',
+            'Erreur entrée ❌',
+            'danger',
+            '',
+            'OK'
+          );
         }
-
       });
-
     });
-
   }
 
   // ===================== SORTIE =====================
-
   onAddSortie(data: any): void {
-
-    const dialogRef =
-      this.dialog.open(SortieStockComponent, {
-        width: '500px',
-        data
-      });
+    const dialogRef = this.dialog.open(SortieStockComponent, {
+      width: '500px',
+      data
+    });
 
     dialogRef.afterClosed().subscribe(result => {
-
       if (!result) return;
 
       this.isLoading.set(true);
 
       this.stockService.addSortie(result).subscribe({
-
         next: () => {
-
+          this.globalService.alert(
+            'La sortie de stock a été enregistrée avec succès.',
+            'Sortie ajoutée ✅',
+            'success',
+            '',
+            'OK'
+          );
           this.loadStock();
-
         },
-
         error: (error) => {
-
-          console.log(error);
-          alert("Erreur lors de l'ajout de la sortie de stock : " + error.message);
           this.isLoading.set(false);
-
+          this.globalService.alert(
+            error?.error?.message || 'Erreur lors de l\'ajout de la sortie',
+            'Erreur sortie ❌',
+            'danger',
+            '',
+            'OK'
+          );
         }
-
       });
-
     });
-
   }
-
 }

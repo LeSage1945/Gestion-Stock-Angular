@@ -2,15 +2,12 @@ import { BehaviorSubject, switchMap, map, Observable, tap } from 'rxjs';
 import { Component, inject, OnInit } from '@angular/core';
 
 import { UserService } from './user.service';
+import { GlobalServiceService } from '../../core/service/global-service.service';
 
 import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { ModalUserComponent } from './modal-user-component/modal-user-component';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog-component/confirm-dialog-component';
-import { NotificationComponent } from '../../shared/components/notification.component/notification.component';
-
-import { GlobalServiceService } from '../../core/service/global-service.service';
 
 import { TableComponent } from "../../shared/components/table-component/table-component";
 import { LoaderComponent } from "../../shared/components/loader-component/loader-component";
@@ -30,7 +27,6 @@ export class UsersComponent implements OnInit {
   // ================= SERVICES =================
   private userService = inject(UserService);
   private dialog = inject(MatDialog);
-  private snackBar = inject(MatSnackBar);
   private globalService = inject(GlobalServiceService);
 
   // ================= STATE =================
@@ -38,7 +34,7 @@ export class UsersComponent implements OnInit {
   isLoading = true;
 
   // ================= USERS STREAM =================
-  users$: Observable<user[]> = this.refresh$.pipe(  
+  users$: Observable<user[]> = this.refresh$.pipe(
     switchMap(() =>
       this.userService.getAllUsers().pipe(
         map(users =>
@@ -77,47 +73,24 @@ export class UsersComponent implements OnInit {
     this.isLoading = true;
     this.refresh$.next(true);
 
-    this.totalUser$ = this.users$.pipe(
-      map(u => u.length)
-    );
-
-    this.totalAdmin$ = this.users$.pipe(
-      map(u => u.filter(i => i.role === 'ADMIN').length)
-    );
-
-    this.totalCaissier$ = this.users$.pipe(
-      map(u => u.filter(i => i.role === 'CAISSIER').length)
-    );
+    this.totalUser$ = this.users$.pipe(map(u => u.length));
+    this.totalAdmin$ = this.users$.pipe(map(u => u.filter(i => i.role === 'ADMIN').length));
+    this.totalCaissier$ = this.users$.pipe(map(u => u.filter(i => i.role === 'CAISSIER').length));
   }
 
   // ================= ROLE STYLE =================
   getRoleStyle(role: string) {
-
-    const base = {
-      padding: '4px 8px',
-      borderRadius: '6px',
-      fontWeight: '500'
-    };
-
+    const base = { padding: '4px 8px', borderRadius: '6px', fontWeight: '500' };
     switch (role) {
-
-      case 'ADMIN':
-        return { ...base, color: '#dc3545' };
-
-      case 'CAISSIER':
-        return { ...base, color: '#ffc107' };
-
-      case 'VENDEUR':
-        return { ...base, color: '#0d6efd' };
-
-      default:
-        return base;
+      case 'ADMIN': return { ...base, color: '#dc3545' };
+      case 'CAISSIER': return { ...base, color: '#ffc107' };
+      case 'VENDEUR': return { ...base, color: '#0d6efd' };
+      default: return base;
     }
   }
 
   // ================= CREATE =================
   onAdd() {
-
     const dialogRef = this.dialog.open(ModalUserComponent, {
       width: '1000px',
       height: '550px',
@@ -125,45 +98,47 @@ export class UsersComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-
       if (!result) return;
 
       this.isLoading = true;
+      console.log("coucou")
 
-      this.userService.createUser(result)
-        .subscribe({
-          next: () => {
-
-            this.snackBar.openFromComponent(NotificationComponent, {
-              data: { message: 'Utilisateur ajouté avec succès ✅' },
-              duration: 3000,
-            });
-
-            this.reloadUsers();
-          },
-          error: (err) => {
-            console.error(err);
-            this.isLoading = false;
-          }
-        });
-
+      this.userService.createUser(result).subscribe({
+        next: () => {
+          this.globalService.alert(
+            'L\'utilisateur a été ajouté avec succès.',
+            'Utilisateur créé ✅',
+            'success',
+            '',
+            'OK'
+          );
+          this.reloadUsers();
+        },
+        error: (err) => {
+          this.isLoading = false;
+          this.globalService.alert(
+            err?.error?.message || 'Erreur lors de la création',
+            'Erreur création ❌',
+            'danger',
+            '',
+            'OK'
+          );
+        }
+      });
     });
   }
 
   // ================= VIEW =================
   onView(user: user) {
-
     this.dialog.open(ModalUserComponent, {
       width: '1000px',
       height: '550px',
       data: { action: 'view', data: user }
     });
-
   }
 
   // ================= EDIT =================
   onEdit(user: user) {
-
     const id = user.id;
 
     const dialogRef = this.dialog.open(ModalUserComponent, {
@@ -173,64 +148,71 @@ export class UsersComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-
       if (!result) return;
 
       this.isLoading = true;
 
-      this.userService.updateUser(id, result)
-        .subscribe({
-          next: () => {
-
-            this.snackBar.openFromComponent(NotificationComponent, {
-              data: { message: 'Utilisateur modifié avec succès ✅' },
-              duration: 3000,
-            });
-
-            this.reloadUsers();
-          },
-          error: (err) => {
-            console.error(err);
-            this.isLoading = false;
-          }
-        });
-
+      this.userService.updateUser(id, result).subscribe({
+        next: () => {
+          this.globalService.alert(
+            `L'utilisateur "${user.nom}" a été modifié avec succès.`,
+            'Utilisateur modifié ✅',
+            'success',
+            '',
+            'OK'
+          );
+          this.reloadUsers();
+        },
+        error: (err) => {
+          this.isLoading = false;
+          this.globalService.alert(
+            err?.error?.message || 'Erreur lors de la modification',
+            'Erreur modification ❌',
+            'danger',
+            '',
+            'OK'
+          );
+        }
+      });
     });
   }
 
   // ================= DELETE =================
   onDelete(user: user) {
-
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: 'Supprimer utilisateur',
-        message: `Voulez-vous supprimer ${user.nom}`
+        message: `Voulez-vous supprimer "${user.nom}" ?`
       }
     });
 
     dialogRef.afterClosed().subscribe(result => {
-
       if (!result) return;
 
       this.isLoading = true;
 
-      this.userService.deleteUser(user.id)
-        .subscribe({
-          next: () => {
-
-            this.snackBar.openFromComponent(NotificationComponent, {
-              data: { message: 'Utilisateur supprimé avec succès ✅' },
-              duration: 3000,
-            });
-
-            this.reloadUsers();
-          },
-          error: (err) => {
-            console.error(err);
-            this.isLoading = false;
-          }
-        });
-
+      this.userService.deleteUser(user.id).subscribe({
+        next: () => {
+          this.globalService.alert(
+            `L'utilisateur "${user.nom}" a été supprimé avec succès.`,
+            'Utilisateur supprimé ✅',
+            'success',
+            '',
+            'OK'
+          );
+          this.reloadUsers();
+        },
+        error: (err) => {
+          this.isLoading = false;
+          this.globalService.alert(
+            err?.error?.message || 'Erreur lors de la suppression',
+            'Erreur suppression ❌',
+            'danger',
+            '',
+            'OK'
+          );
+        }
+      });
     });
   }
 }

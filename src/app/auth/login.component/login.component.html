@@ -44,7 +44,7 @@
           <label class="form-label">Mot de passe</label>
           <input type="password" class="form-control" formControlName="password" />
           @if (userForm.get('password')?.invalid && userForm.get('password')?.touched) {
-            <small class="text-danger">Mot de passe obligatoire </small>
+            <small class="text-danger">Mot de passe obligatoire et doit contenir au moin 6 cararecters</small>
           }
         </div>
 

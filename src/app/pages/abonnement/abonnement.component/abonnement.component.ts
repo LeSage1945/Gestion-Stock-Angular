@@ -2,9 +2,11 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AbonnementService } from '../abonnement.service';
 import { CompteService } from '../../compte-component/compte.service';
+import { GlobalServiceService } from '../../../core/service/global-service.service';
 import { forkJoin } from 'rxjs';
 import { ActivationComponent } from '../activation.component/activation.component';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogComponent } from '../../../shared/confirm-dialog-component/confirm-dialog-component';
 
 @Component({
   selector: 'app-abonnement',
@@ -14,9 +16,11 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
   styleUrl: './abonnement.component.css'
 })
 export class AbonnementComponent implements OnInit {
+
   private abonnementService = inject(AbonnementService);
   private compteService = inject(CompteService);
-  private dialog = inject(MatDialog); // Injection d'Angular Material Dialog
+  private globalService = inject(GlobalServiceService);
+  private dialog = inject(MatDialog);
 
   comptes = signal<any[]>([]);
   loading = signal(false);
@@ -25,72 +29,111 @@ export class AbonnementComponent implements OnInit {
     this.loadData();
   }
 
-  // ================= LOAD DATA (COMPTES + ABONNEMENTS) =================
+  // ================= LOAD DATA =================
   loadData() {
     this.loading.set(true);
 
-    // On lance les deux requêtes en parallèle
     forkJoin({
       comptes: this.compteService.getAllCompte(),
       abonnements: this.abonnementService.getAllAbonnements()
     }).subscribe({
       next: ({ comptes, abonnements }) => {
-        // On associe à chaque compte son abonnement correspondant
         const comptesRemplis = comptes.map((compte: any) => {
           const abo = abonnements.find((a: any) => a.compteId === compte.id);
-          return {
-            ...compte,
-            abonnement: abo || null // null si aucun abonnement en BDD
-          };
+          return { ...compte, abonnement: abo || null };
         });
-
         this.comptes.set(comptesRemplis);
       },
-      error: (err) => console.error('Erreur de chargement', err),
+      error: (err) => {
+        this.loading.set(false);
+        this.globalService.alert(
+          err?.error?.message || 'Erreur lors du chargement des données',
+          'Erreur',
+          'danger',
+          '',
+          'OK'
+        );
+      },
       complete: () => this.loading.set(false)
     });
   }
 
-  // ================= ACTIVER ABONNEMENT =================
+  // ================= ACTIVER =================
   activer(compteId: string) {
-    // 1. Ouvrir le composant enfant via Angular Material
     const dialogRef = this.dialog.open(ActivationComponent, {
       width: '500px',
-      disableClose: true, // Évite de fermer en cliquant à côté (équivalent de backdrop static)
-      panelClass: 'custom-dialog-container' // Optionnel: pour appliquer des styles personnalisés
+      disableClose: true,
+      panelClass: 'custom-dialog-container'
     });
 
-    // 2. Récupérer la durée après la fermeture du dialog
     dialogRef.afterClosed().subscribe((duree: number | null) => {
-      // Si l'utilisateur a validé et fourni une durée valide
-      if (duree && duree > 0) {
-        this.loading.set(true);
+      if (!duree || duree <= 0) return;
 
-        this.abonnementService.activer(compteId, duree).subscribe({
-          next: () => {
-            this.loadData(); // Recharge le tableau automatiquement
-          },
-          error: (err) => {
-            console.error(err);
-            this.loading.set(false);
-          }
-        });
-      }
+      this.loading.set(true);
+
+      this.abonnementService.activer(compteId, duree).subscribe({
+        next: () => {
+          this.globalService.alert(
+            `L'abonnement a été activé avec succès pour ${duree} mois.`,
+            'Abonnement activé ✅',
+            'success',
+            '',
+            'OK'
+          );
+          this.loadData();
+        },
+        error: (err) => {
+          this.loading.set(false);
+          this.globalService.alert(
+            err?.error?.message || "Erreur lors de l'activation de l'abonnement",
+            "Erreur activation ❌",
+            'danger',
+            '',
+            'OK'
+          );
+        }
+      });
     });
   }
 
-  // ================= DÉSACTIVER ABONNEMENT =================
+  // ================= DÉSACTIVER =================
   desactiver(compteId: string) {
-    this.loading.set(true);
+    const compte = this.comptes().find(c => c.id === compteId);
 
-    this.abonnementService.desactiver(compteId).subscribe({
-      next: () => {
-        this.loadData(); // Recharge le tableau automatiquement
-      },
-      error: (err) => {
-        console.error(err);
-        this.loading.set(false);
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Désactiver abonnement',
+        message: `Voulez-vous désactiver l'abonnement du compte "${compte?.nom || compteId}" ?`
       }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (!result) return;
+
+      this.loading.set(true);
+
+      this.abonnementService.desactiver(compteId).subscribe({
+        next: () => {
+          this.globalService.alert(
+            `L'abonnement du compte "${compte?.nom || ''}" a été désactivé avec succès.`,
+            'Abonnement désactivé ✅',
+            'success',
+            '',
+            'OK'
+          );
+          this.loadData();
+        },
+        error: (err) => {
+          this.loading.set(false);
+          this.globalService.alert(
+            err?.error?.message || "Erreur lors de la désactivation de l'abonnement",
+            'Erreur désactivation ❌',
+            'danger',
+            '',
+            'OK'
+          );
+        }
+      });
     });
   }
 }

@@ -9,16 +9,10 @@ import {
 import { FournisseurService } from '../fournisseur.service';
 import { Ifournisseur } from '../fournisseur.model';
 
-import { NotificationComponent } from '../../../shared/components/notification.component/notification.component';
 import { ConfirmDialogComponent } from '../../../shared/confirm-dialog-component/confirm-dialog-component';
-
 import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
-
 import { GlobalServiceService } from '../../../core/service/global-service.service';
-
 import { FournisseurModalComponent } from '../modal/fournisseur.modal.component/fournisseur.modal.component';
-
 import { LoaderComponent } from "../../../shared/components/loader-component/loader-component";
 
 @Component({
@@ -31,362 +25,197 @@ import { LoaderComponent } from "../../../shared/components/loader-component/loa
 export class FournisseurComponent implements OnInit {
 
   // ===================== INJECT =====================
-
   private dialog = inject(MatDialog);
+  private fournisseurService = inject(FournisseurService);
+  public globalService = inject(GlobalServiceService);
 
-  private fournisseurService =
-    inject(FournisseurService);
-
-  private snackBar =
-    inject(MatSnackBar);
-
-  public globalServiceService =
-    inject(GlobalServiceService);
-
-  // ===================== TITLE =====================
-
-  TitrePage =
-    signal('📦 Gestion des Fournisseurs');
-
-  // ===================== DATA =====================
-
-  fournisseurListe =
-    signal<Ifournisseur[]>([]);
-
-  fournisseurFiltre =
-    signal<Ifournisseur[]>([]);
-
-  // ===================== SEARCH =====================
-
-  recherche =
-    signal('');
-
-  // ===================== LOADING =====================
-
-  isLoading =
-    signal(true);
+  // ===================== SIGNALS =====================
+  TitrePage = signal('📦 Gestion des Fournisseurs');
+  fournisseurListe = signal<Ifournisseur[]>([]);
+  fournisseurFiltre = signal<Ifournisseur[]>([]);
+  recherche = signal('');
+  isLoading = signal(true);
 
   // ===================== STATS =====================
-
-  totalFournisseurs = computed(() =>
-
-    this.fournisseurFiltre().length
-
-  );
+  totalFournisseurs = computed(() => this.fournisseurFiltre().length);
 
   fournisseursAvecTelephone = computed(() =>
-
-    this.fournisseurFiltre().filter(
-      f => !!f.telephone
-    ).length
-
+    this.fournisseurFiltre().filter(f => !!f.telephone).length
   );
 
   fournisseursAvecAdresse = computed(() =>
-
-    this.fournisseurFiltre().filter(
-      f => !!f.adresse
-    ).length
-
+    this.fournisseurFiltre().filter(f => !!f.adresse).length
   );
 
   // ===================== INIT =====================
-
   ngOnInit(): void {
-
     this.getAllFournisseur();
-
   }
 
   // ===================== GET ALL =====================
-
   getAllFournisseur(): void {
-
     this.isLoading.set(true);
-
-    this.fournisseurService
-      .getAllFournisseur()
-      .subscribe({
-
-        next: (data: Ifournisseur[]) => {
-
-          console.log(data);
-
-          this.fournisseurListe.set(data);
-
-          this.fournisseurFiltre.set(data);
-
-          this.isLoading.set(false);
-
-        },
-
-        error: (error) => {
-
-          console.log(error.error?.message);
-
-          this.isLoading.set(false);
-
-        }
-
-      });
-
+    this.fournisseurService.getAllFournisseur().subscribe({
+      next: (data: Ifournisseur[]) => {
+        this.fournisseurListe.set(data);
+        this.fournisseurFiltre.set(data);
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        this.isLoading.set(false);
+        this.globalService.alert(
+          err?.error?.message || 'Erreur lors du chargement des fournisseurs',
+          'Erreur',
+          'danger',
+          '',
+          'OK'
+        );
+      }
+    });
   }
 
   // ===================== VIEW =====================
-
   onView(fournisseur: Ifournisseur): void {
-
-    this.dialog.open(
-      FournisseurModalComponent,
-      {
-        width: '1000px',
-        height: '550px',
-
-        data: {
-          action: 'view',
-          data: fournisseur
-        }
-      }
-    );
-
+    this.dialog.open(FournisseurModalComponent, {
+      width: '1000px',
+      height: '550px',
+      data: { action: 'view', data: fournisseur }
+    });
   }
 
   // ===================== CREATE =====================
-
   onCreate(): void {
-
-    const dialogRef =
-      this.dialog.open(
-        FournisseurModalComponent,
-        {
-          width: '1000px',
-          height: '550px',
-
-          data: {
-            mode: 'create',
-            data: ''
-          }
-        }
-      );
+    const dialogRef = this.dialog.open(FournisseurModalComponent, {
+      width: '1000px',
+      height: '550px',
+      data: { mode: 'create', data: '' }
+    });
 
     dialogRef.afterClosed().subscribe(resultat => {
-
       if (!resultat) return;
 
       this.isLoading.set(true);
 
-      this.fournisseurService
-        .createFournisseur(resultat)
-        .subscribe({
-
-          next: (data) => {
-
-            console.log(data);
-
-            this.snackBar.openFromComponent(
-              NotificationComponent,
-              {
-                data: {
-                  message:
-                    'Fournisseur ajouté avec succès ✅'
-                },
-
-                duration: 3000,
-              }
-            );
-
-            this.getAllFournisseur();
-
-          },
-
-          error: (error) => {
-
-            console.log(error.error?.message);
-
-            this.isLoading.set(false);
-
-          }
-
-        });
-
+      this.fournisseurService.createFournisseur(resultat).subscribe({
+        next: () => {
+          this.globalService.alert(
+            'Le fournisseur a été ajouté avec succès.',
+            'Fournisseur créé ✅',
+            'success',
+            '',
+            'OK'
+          );
+          this.getAllFournisseur();
+        },
+        error: (err) => {
+          this.isLoading.set(false);
+          this.globalService.alert(
+            err?.error?.message || 'Erreur lors de la création du fournisseur',
+            'Erreur création ❌',
+            'danger',
+            '',
+            'OK'
+          );
+        }
+      });
     });
-
   }
 
   // ===================== UPDATE =====================
-
   onEdit(fournisseur: Ifournisseur): void {
+    const idFournisseur = fournisseur.id;
 
-    console.log(fournisseur);
-
-    const idFournisseur =
-      fournisseur.id;
-
-    const dialogRef =
-      this.dialog.open(
-        FournisseurModalComponent,
-        {
-          width: '1000px',
-          height: '550px',
-
-          data: {
-            mode: 'update',
-            data: fournisseur
-          }
-        }
-      );
+    const dialogRef = this.dialog.open(FournisseurModalComponent, {
+      width: '1000px',
+      height: '550px',
+      data: { mode: 'update', data: fournisseur }
+    });
 
     dialogRef.afterClosed().subscribe(resultat => {
-
-      console.log(resultat);
-
       if (!resultat) return;
 
       this.isLoading.set(true);
 
-      this.fournisseurService
-        .updateFournisseur(
-          idFournisseur,
-          resultat
-        )
-        .subscribe({
-
-          next: () => {
-
-            this.snackBar.openFromComponent(
-              NotificationComponent,
-              {
-                data: {
-                  message:
-                    'Fournisseur modifié avec succès ✅'
-                },
-
-                duration: 3000,
-              }
-            );
-
-            this.getAllFournisseur();
-
-          },
-
-          error: (error) => {
-
-            console.log(error);
-
-            this.isLoading.set(false);
-
-          }
-
-        });
-
+      this.fournisseurService.updateFournisseur(idFournisseur, resultat).subscribe({
+        next: () => {
+          this.globalService.alert(
+            `Le fournisseur "${fournisseur.nom}" a été modifié avec succès.`,
+            'Fournisseur modifié ✅',
+            'success',
+            '',
+            'OK'
+          );
+          this.getAllFournisseur();
+        },
+        error: (err) => {
+          this.isLoading.set(false);
+          this.globalService.alert(
+            err?.error?.message || 'Erreur lors de la modification du fournisseur',
+            'Erreur modification ❌',
+            'danger',
+            '',
+            'OK'
+          );
+        }
+      });
     });
-
   }
 
   // ===================== DELETE =====================
-
   onDelete(fournisseur: Ifournisseur): void {
-
-    console.log(fournisseur);
-
-    const dialogRef =
-      this.dialog.open(
-        ConfirmDialogComponent,
-        {
-          data: {
-            title: 'Supprimer fournisseur',
-
-            message:
-              `Voulez-vous supprimer le fournisseur ${fournisseur.nom} ?`
-          }
-        }
-      );
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Supprimer fournisseur',
+        message: `Voulez-vous supprimer le fournisseur "${fournisseur.nom}" ?`
+      }
+    });
 
     dialogRef.afterClosed().subscribe(result => {
-
       if (!result) return;
 
       this.isLoading.set(true);
 
-      this.fournisseurService
-        .deleteFournisseur(fournisseur.id)
-        .subscribe({
-
-          next: () => {
-
-            this.snackBar.openFromComponent(
-              NotificationComponent,
-              {
-                data: {
-                  message:
-                    'Fournisseur supprimé avec succès ✅'
-                },
-
-                duration: 3000,
-              }
-            );
-
-            this.getAllFournisseur();
-
-          },
-
-          error: (error) => {
-
-            console.log(error);
-
-            this.isLoading.set(false);
-
-          }
-
-        });
-
+      this.fournisseurService.deleteFournisseur(fournisseur.id).subscribe({
+        next: () => {
+          this.globalService.alert(
+            `Le fournisseur "${fournisseur.nom}" a été supprimé avec succès.`,
+            'Fournisseur supprimé ✅',
+            'success',
+            '',
+            'OK'
+          );
+          this.getAllFournisseur();
+        },
+        error: (err) => {
+          this.isLoading.set(false);
+          this.globalService.alert(
+            err?.error?.message || 'Erreur lors de la suppression du fournisseur',
+            'Erreur suppression ❌',
+            'danger',
+            '',
+            'OK'
+          );
+        }
+      });
     });
-
   }
 
   // ===================== SEARCH =====================
-
   onSearch(event: Event): void {
-
-    const value =
-      (event.target as HTMLInputElement)
-        .value
-        .toLowerCase();
-
+    const value = (event.target as HTMLInputElement).value.toLowerCase();
     this.recherche.set(value);
 
     if (!value.trim()) {
-
-      this.fournisseurFiltre.set(
-        this.fournisseurListe()
-      );
-
+      this.fournisseurFiltre.set(this.fournisseurListe());
       return;
     }
 
-    const filtered =
-      this.fournisseurListe().filter(f =>
-
-        f.nom
-          .toLowerCase()
-          .includes(value)
-
-        ||
-
-        f.adresse
-          ?.toLowerCase()
-          .includes(value)
-
-        ||
-
-        f.telephone
-          ?.toLowerCase()
-          .includes(value)
-
-      );
+    const filtered = this.fournisseurListe().filter(f =>
+      f.nom.toLowerCase().includes(value) ||
+      f.adresse?.toLowerCase().includes(value) ||
+      f.telephone?.toLowerCase().includes(value)
+    );
 
     this.fournisseurFiltre.set(filtered);
-
   }
-
 }

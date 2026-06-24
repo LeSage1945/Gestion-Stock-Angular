@@ -1,0 +1,25 @@
+<div
+  class="Message mt-0 text-light"
+  [ngStyle]="{ background: backgroundColor }"
+  [ngClass]="styleAlert"
+>
+  <div class="Message-body">
+    <h1 [ngClass]="{ 'text-light': !textColor }" [ngStyle]="{ color: textColor }" style="font-size: 25px;">{{ title }}</h1>
+    <p [innerHTML]="content" [ngStyle]="{ color: textColor }" *ngIf="content; else emptyErr"></p>
+    <ng-template #emptyErr>
+      <label for="" [ngStyle]="{ color: textColor }">Erreur vide !</label>
+    </ng-template>
+
+    <div class="d-flex justify-content-end">
+      <button class="Message-button" id="js-helpMe" mat-dialog-close *ngIf="buttonCancelName">
+        {{ buttonCancelName }}
+      </button>
+      <button class="Message-button js-messageClose" [mat-dialog-close]="true" *ngIf="buttonOKName">
+        {{ buttonOKName }}
+      </button>
+    </div>
+  </div>
+  <button class="Message-close js-messageClose" mat-dialog-close>
+    <i class="fa fa-times text-light"></i>
+  </button>
+</div>

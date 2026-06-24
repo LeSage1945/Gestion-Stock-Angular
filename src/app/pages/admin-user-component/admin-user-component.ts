@@ -3,6 +3,9 @@ import { CompteService } from '../compte-component/compte.service';
 import { ICompte } from '../compte-component/model/compte.model';
 import { UserService } from '../users-component/user.service';
 import { AdminUserService } from './admin-user.service';
+import { GlobalServiceService } from '../../core/service/global-service.service';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogComponent } from '../../shared/confirm-dialog-component/confirm-dialog-component';
 
 @Component({
   selector: 'app-admin-user-component',
@@ -11,9 +14,12 @@ import { AdminUserService } from './admin-user.service';
   styleUrl: './admin-user-component.css',
 })
 export class AdminUserComponent implements OnInit {
+
   private utilisateurService = inject(UserService);
   private AdminUserService = inject(AdminUserService);
   private compteService = inject(CompteService);
+  private globalService = inject(GlobalServiceService);
+  private dialog = inject(MatDialog);
 
   utilisateurs = signal<any[]>([]);
   comptes = signal<ICompte[]>([]);
@@ -31,20 +37,38 @@ export class AdminUserComponent implements OnInit {
     this.loadInitialData();
   }
 
+  // ================= LOAD =================
   loadInitialData(): void {
     this.compteService.getAllCompte().subscribe({
       next: (res) => this.comptes.set(res),
-      error: (err) => console.error(err)
+      error: (err) => {
+        this.globalService.alert(
+          err?.error?.message || 'Erreur lors du chargement des comptes',
+          'Erreur',
+          'danger',
+          '',
+          'OK'
+        );
+      }
     });
+
     this.AdminUserService.getAllUsers().subscribe({
       next: (res) => this.utilisateurs.set(res),
-      error: (err) => console.error(err)
+      error: (err) => {
+        this.globalService.alert(
+          err?.error?.message || 'Erreur lors du chargement des utilisateurs',
+          'Erreur',
+          'danger',
+          '',
+          'OK'
+        );
+      }
     });
   }
 
+  // ================= VALIDATION =================
   updateField(field: string, value: string): void {
     this.userForm.update(state => ({ ...state, [field]: value }));
-    // Valider le champ en temps réel
     this.validerChamp(field, value);
   }
 
@@ -90,26 +114,71 @@ export class AdminUserComponent implements OnInit {
     return Object.keys(this.erreurs()).length === 0;
   }
 
+  // ================= CREATE =================
   createUserWithAccount(): void {
     if (!this.validerTout()) return;
 
     this.utilisateurService.createWithAccount(this.userForm(), this.selectedCompteId()).subscribe({
       next: () => {
+        this.globalService.alert(
+          `L'administrateur "${this.userForm().nom}" a été créé et affecté au compte avec succès.`,
+          'Administrateur créé ✅',
+          'success',
+          '',
+          'OK'
+        );
         this.userForm.set({ nom: '', email: '', motDePasse: '', role: 'ADMIN' });
         this.selectedCompteId.set('');
         this.erreurs.set({});
         this.loadInitialData();
       },
-      error: (err) => console.error(err)
+      error: (err) => {
+        this.globalService.alert(
+          err?.error?.message || 'Erreur lors de la création',
+          'Erreur création ❌',
+          'danger',
+          '',
+          'OK'
+        );
+      }
     });
   }
 
+  // ================= DELETE =================
   deleteUser(id: string): void {
-    if (confirm('Supprimer cet administrateur ?')) {
+    const user = this.utilisateurs().find(u => u.id === id);
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Supprimer administrateur',
+        message: `Voulez-vous supprimer "${user?.nom || 'cet administrateur'}" ?`
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (!result) return;
+
       this.utilisateurService.deleteUser(id).subscribe({
-        next: () => this.loadInitialData(),
-        error: (err) => console.error(err)
+        next: () => {
+          this.globalService.alert(
+            `L'administrateur a été supprimé avec succès.`,
+            'Supprimé ✅',
+            'success',
+            '',
+            'OK'
+          );
+          this.loadInitialData();
+        },
+        error: (err) => {
+          this.globalService.alert(
+            err?.error?.message || 'Erreur lors de la suppression',
+            'Erreur suppression ❌',
+            'danger',
+            '',
+            'OK'
+          );
+        }
       });
-    }
+    });
   }
 }
