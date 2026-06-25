@@ -1,148 +1,181 @@
-<div class="container-fluid pt-4 px-4" style="background-color: #f8f9fa; min-height: 100vh">
+<div class="container-fluid">
+  <!-- ===================== HEADER ===================== -->
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-      <h3 class="fw-bold text-dark m-0">Gestion des abonnements</h3>
-      <small class="text-muted">Suivez, activez et coupez les accès des comptes clients</small>
+      <h3 class="fw-bold mb-1">🔑 Gestion des abonnements</h3>
+      <p class="text-muted mb-0">Suivez, activez et coupez les accès des comptes clients</p>
     </div>
   </div>
 
-  <div class="mb-3">
-    <small class="text-muted fw-semibold">{{ comptes().length }} compte(s) au total</small>
-  </div>
-
-  <div class="table-responsive">
-    <table
-      class="table table-borderless align-middle"
-      style="border-collapse: separate; border-spacing: 0 12px"
-    >
-      <thead>
-        <tr style="background-color: #1c2229 !important; color: #ffffff !important">
-          <th
-            class="py-3 px-4 fw-bold"
-            style="
-              border-top-left-radius: 4px;
-              border-bottom-left-radius: 4px;
-              background-color: #1c2229 !important;
-              color: white;
-            "
-          >
-            Nom du Client
-          </th>
-          <th class="py-3 fw-bold" style="background-color: #1c2229 !important; color: white">
-            Code
-          </th>
-          <th class="py-3 fw-bold" style="background-color: #1c2229 !important; color: white">
-            Statut
-          </th>
-          <th class="py-3 fw-bold" style="background-color: #1c2229 !important; color: white">
-            Échéance
-          </th>
-          <th
-            class="py-3 text-end px-4 fw-bold"
-            style="
-              border-top-right-radius: 4px;
-              border-bottom-right-radius: 4px;
-              background-color: #1c2229 !important;
-              color: white;
-            "
-          >
-            Actions
-          </th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr *ngFor="let c of comptes()" class="bg-white shadow-sm" style="border-radius: 4px">
-          <td
-            class="py-3 px-4 fw-bold text-dark"
-            style="border-top-left-radius: 4px; border-bottom-left-radius: 4px"
-          >
-            {{ c.nom }}
-          </td>
-
-          <td class="py-3">
-            <span
-              class="badge bg-secondary px-2 py-2 fw-semibold"
-              style="background-color: #6c757d !important; color: #ffffff"
-            >
-              {{ c.code }}
-            </span>
-          </td>
-
-          <td class="py-3">
-            <span
-              *ngIf="c.abonnement?.statut === 'ACTIF'"
-              class="badge bg-success px-3 py-2 fw-bold d-inline-flex align-items-center"
-              style="background-color: #198754 !important; color: #ffffff; border-radius: 20px"
-            >
-              <span class="me-1">✔</span> Actif
-            </span>
-            <span
-              *ngIf="c.abonnement?.statut !== 'ACTIF'"
-              class="badge bg-danger px-3 py-2 fw-bold d-inline-flex align-items-center"
-              style="background-color: #dc3545 !important; color: #ffffff; border-radius: 20px"
-            >
-              <span class="me-1">✕</span> Inactif
-            </span>
-          </td>
-
-          <td class="py-3 fw-semibold text-secondary">
-            <span *ngIf="c.abonnement?.fin">
-              {{ c.abonnement.fin | date: 'dd/MM/yyyy' }}
-            </span>
-            <span *ngIf="!c.abonnement?.fin" class="text-muted italic small">
-              Aucun abonnement
-            </span>
-          </td>
-
-          <td
-            class="py-3 text-end px-4"
-            style="border-top-right-radius: 4px; border-bottom-right-radius: 4px"
-          >
-            <div class="d-flex justify-content-end align-items-center gap-2">
-              <button
-                *ngIf="c.abonnement?.statut !== 'ACTIF'"
-                class="btn btn-success fw-bold px-3 py-2 shadow-sm"
-                style="
-                  background-color: #198754;
-                  border: none;
-                  font-size: 0.85rem;
-                  border-radius: 6px;
-                "
-                (click)="activer(c.id)"
-                [disabled]="loading()"
-              >
-                ⚡ Activer
-              </button>
-
-              <ng-container *ngIf="c.abonnement?.statut === 'ACTIF'">
-                <button
-                  class="btn btn-outline-success fw-bold px-3 py-2 shadow-sm"
-                  style="font-size: 0.85rem; border-radius: 6px"
-                  (click)="activer(c.id)"
-                  [disabled]="loading()"
-                >
-                  🔄 Prolonger
-                </button>
-
-                <button
-                  class="btn btn-danger fw-bold px-3 py-2 shadow-sm"
-                  style="
-                    background-color: #dc3545;
-                    border: none;
-                    font-size: 0.85rem;
-                    border-radius: 6px;
-                  "
-                  (click)="desactiver(c.id)"
-                  [disabled]="loading()"
-                >
-                  ✕ Désactiver
-                </button>
-              </ng-container>
+  @if (loading()) {
+    <app-loader-component [isLoading]="loading()"></app-loader-component>
+  } @else {
+    <!-- ===================== STATS ===================== -->
+    <div class="row g-4 mb-4">
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-4 bg-primary text-white">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="text-uppercase opacity-75">Total comptes</h6>
+                <h2 class="fw-bold mb-0">{{ totalComptes() }}</h2>
+              </div>
+              <i class="bi bi-people fs-1 opacity-50"></i>
             </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-4 bg-success text-white">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="text-uppercase opacity-75">Abonnements actifs</h6>
+                <h2 class="fw-bold mb-0">{{ totalActifs() }}</h2>
+              </div>
+              <i class="bi bi-check-circle fs-1 opacity-50"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-4 bg-danger text-white">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="text-uppercase opacity-75">Abonnements inactifs</h6>
+                <h2 class="fw-bold mb-0">{{ totalInactifs() }}</h2>
+              </div>
+              <i class="bi bi-x-circle fs-1 opacity-50"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== TABLE ===================== -->
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <h5 class="fw-bold mb-1">📋 Liste des comptes</h5>
+            <p class="text-muted mb-0">{{ totalComptes() }} compte(s) enregistré(s)</p>
+          </div>
+        </div>
+
+        @if (comptes().length > 0) {
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead class="table-dark">
+                <tr>
+                  <th>Nom du client</th>
+                  <th>Code</th>
+                  <th>Statut</th>
+                  <th>Échéance</th>
+                  <th class="text-end">Actions</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                @for (c of comptes(); track c.id) {
+                  <tr>
+                    <!-- NOM -->
+                    <td>
+                      <div class="d-flex align-items-center gap-2">
+                        <div
+                          class="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center"
+                          style="width: 38px; height: 38px; min-width: 38px"
+                        >
+                          <i class="bi bi-building"></i>
+                        </div>
+                        <span class="fw-bold">{{ c.nom }}</span>
+                      </div>
+                    </td>
+
+                    <!-- CODE -->
+                    <td>
+                      <span class="badge bg-secondary px-2 py-2 fw-semibold">
+                        {{ c.code }}
+                      </span>
+                    </td>
+
+                    <!-- STATUT -->
+                    <td>
+                      @if (c.abonnement?.statut === 'ACTIF') {
+                        <span
+                          class="badge bg-success px-3 py-2 fw-bold d-inline-flex align-items-center gap-1"
+                          style="border-radius: 20px"
+                        >
+                          <i class="bi bi-check-circle-fill"></i> Actif
+                        </span>
+                      } @else {
+                        <span
+                          class="badge bg-danger px-3 py-2 fw-bold d-inline-flex align-items-center gap-1"
+                          style="border-radius: 20px"
+                        >
+                          <i class="bi bi-x-circle-fill"></i> Inactif
+                        </span>
+                      }
+                    </td>
+
+                    <!-- ÉCHÉANCE -->
+                    <td class="fw-semibold text-secondary">
+                      @if (c.abonnement?.fin) {
+                        <span>
+                          <i class="bi bi-calendar-event me-1"></i>
+                          {{ c.abonnement.fin | date: 'dd/MM/yyyy' }}
+                        </span>
+                      } @else {
+                        <span class="text-muted fst-italic small">Aucun abonnement</span>
+                      }
+                    </td>
+
+                    <!-- ACTIONS -->
+                    <td class="text-end">
+                      <div class="d-flex justify-content-end align-items-center gap-2">
+                        @if (c.abonnement?.statut !== 'ACTIF') {
+                          <button
+                            class="btn btn-success bg-success fw-bold px-3 py-2 shadow-sm"
+                            style="font-size: 0.85rem; border-radius: 6px"
+                            (click)="activer(c.id)"
+                            [disabled]="loading()"
+                          >
+                            <i class="bi bi-lightning-fill me-1"></i> Activer
+                          </button>
+                        } @else {
+                          <button
+                            class="btn btn-outline-success fw-bold px-3 py-2 shadow-sm"
+                            style="font-size: 0.85rem; border-radius: 6px"
+                            (click)="activer(c.id)"
+                            [disabled]="loading()"
+                          >
+                            <i class="bi bi-arrow-clockwise me-1"></i> Prolonger
+                          </button>
+                          <button
+                            class="btn btn-danger bg-danger fw-bold px-3 py-2 shadow-sm"
+                            style="font-size: 0.85rem; border-radius: 6px;"
+                            (click)="desactiver(c.id)"
+                            [disabled]="loading()"
+                          >
+                            <i class="bi bi-x-circle me-1"></i> Désactiver
+                          </button>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <div class="text-center py-5">
+            <i class="bi bi-inbox fs-1 text-muted"></i>
+            <h5 class="mt-3 text-muted">Aucun compte enregistré</h5>
+          </div>
+        }
+      </div>
+    </div>
+  }
 </div>

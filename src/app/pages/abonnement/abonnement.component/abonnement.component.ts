@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AbonnementService } from '../abonnement.service';
 import { CompteService } from '../../compte-component/compte.service';
@@ -7,11 +7,12 @@ import { forkJoin } from 'rxjs';
 import { ActivationComponent } from '../activation.component/activation.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../../../shared/confirm-dialog-component/confirm-dialog-component';
+import { LoaderComponent } from '../../../shared/components/loader-component/loader-component';
 
 @Component({
   selector: 'app-abonnement',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LoaderComponent],
   templateUrl: './abonnement.component.html',
   styleUrl: './abonnement.component.css'
 })
@@ -23,7 +24,18 @@ export class AbonnementComponent implements OnInit {
   private dialog = inject(MatDialog);
 
   comptes = signal<any[]>([]);
-  loading = signal(false);
+  loading = signal(true);
+
+  // ===================== STATS =====================
+  totalComptes = computed(() => this.comptes().length);
+
+  totalActifs = computed(() =>
+    this.comptes().filter(c => c.abonnement?.statut === 'ACTIF').length
+  );
+
+  totalInactifs = computed(() =>
+    this.comptes().filter(c => c.abonnement?.statut !== 'ACTIF').length
+  );
 
   ngOnInit() {
     this.loadData();
@@ -43,6 +55,7 @@ export class AbonnementComponent implements OnInit {
           return { ...compte, abonnement: abo || null };
         });
         this.comptes.set(comptesRemplis);
+        this.loading.set(false);
       },
       error: (err) => {
         this.loading.set(false);
@@ -53,8 +66,7 @@ export class AbonnementComponent implements OnInit {
           '',
           'OK'
         );
-      },
-      complete: () => this.loading.set(false)
+      }
     });
   }
 

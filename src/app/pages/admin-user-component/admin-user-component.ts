@@ -1,4 +1,5 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { CompteService } from '../compte-component/compte.service';
 import { ICompte } from '../compte-component/model/compte.model';
 import { UserService } from '../users-component/user.service';
@@ -6,10 +7,11 @@ import { AdminUserService } from './admin-user.service';
 import { GlobalServiceService } from '../../core/service/global-service.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog-component/confirm-dialog-component';
+import { LoaderComponent } from '../../shared/components/loader-component/loader-component';
 
 @Component({
   selector: 'app-admin-user-component',
-  imports: [],
+  imports: [CommonModule, LoaderComponent],
   templateUrl: './admin-user-component.html',
   styleUrl: './admin-user-component.css',
 })
@@ -25,6 +27,7 @@ export class AdminUserComponent implements OnInit {
   comptes = signal<ICompte[]>([]);
   selectedCompteId = signal<string>('');
   erreurs = signal<Record<string, string>>({});
+  isLoading = signal(true);
 
   userForm = signal({
     nom: '',
@@ -33,34 +36,46 @@ export class AdminUserComponent implements OnInit {
     role: 'ADMIN'
   });
 
+  // ===================== STATS =====================
+  totalAdmins = computed(() => this.utilisateurs().length);
+
+  totalParCompte = computed(() => {
+    const map = new Map<string, number>();
+    this.utilisateurs().forEach(u => {
+      const nom = u.compteNom || 'Aucun compte';
+      map.set(nom, (map.get(nom) || 0) + 1);
+    });
+    return map.size;
+  });
+
   ngOnInit(): void {
     this.loadInitialData();
   }
 
   // ================= LOAD =================
   loadInitialData(): void {
+    this.isLoading.set(true);
+
     this.compteService.getAllCompte().subscribe({
       next: (res) => this.comptes.set(res),
       error: (err) => {
         this.globalService.alert(
           err?.error?.message || 'Erreur lors du chargement des comptes',
-          'Erreur',
-          'danger',
-          '',
-          'OK'
+          'Erreur', 'danger', '', 'OK'
         );
       }
     });
 
     this.AdminUserService.getAllUsers().subscribe({
-      next: (res) => this.utilisateurs.set(res),
+      next: (res) => {
+        this.utilisateurs.set(res);
+        this.isLoading.set(false);
+      },
       error: (err) => {
+        this.isLoading.set(false);
         this.globalService.alert(
           err?.error?.message || 'Erreur lors du chargement des utilisateurs',
-          'Erreur',
-          'danger',
-          '',
-          'OK'
+          'Erreur', 'danger', '', 'OK'
         );
       }
     });
@@ -121,11 +136,8 @@ export class AdminUserComponent implements OnInit {
     this.utilisateurService.createWithAccount(this.userForm(), this.selectedCompteId()).subscribe({
       next: () => {
         this.globalService.alert(
-          `L'administrateur "${this.userForm().nom}" a été créé et affecté au compte avec succès.`,
-          'Administrateur créé ✅',
-          'success',
-          '',
-          'OK'
+          `L'administrateur "${this.userForm().nom}" a été créé et affecté avec succès.`,
+          'Administrateur créé ✅', 'success', '', 'OK'
         );
         this.userForm.set({ nom: '', email: '', motDePasse: '', role: 'ADMIN' });
         this.selectedCompteId.set('');
@@ -135,10 +147,7 @@ export class AdminUserComponent implements OnInit {
       error: (err) => {
         this.globalService.alert(
           err?.error?.message || 'Erreur lors de la création',
-          'Erreur création ❌',
-          'danger',
-          '',
-          'OK'
+          'Erreur création ❌', 'danger', '', 'OK'
         );
       }
     });
@@ -161,21 +170,15 @@ export class AdminUserComponent implements OnInit {
       this.utilisateurService.deleteUser(id).subscribe({
         next: () => {
           this.globalService.alert(
-            `L'administrateur a été supprimé avec succès.`,
-            'Supprimé ✅',
-            'success',
-            '',
-            'OK'
+            'L\'administrateur a été supprimé avec succès.',
+            'Supprimé ✅', 'success', '', 'OK'
           );
           this.loadInitialData();
         },
         error: (err) => {
           this.globalService.alert(
             err?.error?.message || 'Erreur lors de la suppression',
-            'Erreur suppression ❌',
-            'danger',
-            '',
-            'OK'
+            'Erreur suppression ❌', 'danger', '', 'OK'
           );
         }
       });

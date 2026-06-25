@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
+import { CommonModule } from '@angular/common';
 import { SalesService } from '../sales-component/sales.service';
 import { StockService } from '../stock-component/stock.service';
 import { GlobalServiceService } from '../../core/service/global-service.service';
@@ -10,7 +11,7 @@ import { IStock } from '../stock-component/model/Istock';
 @Component({
   selector: 'app-dashboard-component',
   standalone: true,
-  imports: [BaseChartDirective, LoaderComponent],
+  imports: [BaseChartDirective, LoaderComponent, CommonModule],
   templateUrl: './dashboard-component.html',
   styleUrl: './dashboard-component.css',
 })
@@ -25,7 +26,7 @@ export class DashboardComponent implements OnInit {
   stocks = signal<IStock[]>([]);
   isLoading = signal(true);
 
-  // ===================== COMPUTED STATS =====================
+  // ===================== COMPUTED STATS STOCK =====================
   stockTotal = computed(() =>
     this.stocks().reduce((sum, s) => sum + (s.stockActuel || 0), 0)
   );
@@ -36,11 +37,17 @@ export class DashboardComponent implements OnInit {
     this.stocks().filter(s => s.stockActuel <= s.seuilAlerte).length
   );
 
-  totalQuantite = computed(() =>
-    this.ventes().reduce(
-      (sum, v) => sum + (v.lignes?.reduce((s: number, l: any) => s + l.quantite, 0) || 0),
-      0
-    )
+  // ===================== COMPUTED STATS FINANCIÈRES =====================
+  totalAttendu = computed(() =>
+    this.stocks().reduce((sum, s) => sum + ((s as any).totalAttendu || 0), 0)
+  );
+
+  totalRealise = computed(() =>
+    this.stocks().reduce((sum, s) => sum + ((s as any).totalRealise || 0), 0)
+  );
+
+  manqueAGagner = computed(() =>
+    this.stocks().reduce((sum, s) => sum + ((s as any).manqueAGagner || 0), 0)
   );
 
   totalMontant = computed(() =>
@@ -50,24 +57,20 @@ export class DashboardComponent implements OnInit {
   // ===================== CHART =====================
   lineChartData: ChartConfiguration<'line'>['data'] = {
     labels: [],
-    datasets: [
-      {
-        data: [],
-        label: 'Ventes',
-        fill: true,
-        tension: 0.4,
-        borderColor: '#198754',
-        backgroundColor: 'rgba(25,135,84,0.2)'
-      }
-    ]
+    datasets: [{
+      data: [],
+      label: 'Ventes',
+      fill: true,
+      tension: 0.4,
+      borderColor: '#198754',
+      backgroundColor: 'rgba(25,135,84,0.2)'
+    }]
   };
 
   lineChartOptions: ChartOptions<'line'> = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: {
-      legend: { display: true }
-    }
+    plugins: { legend: { display: true } }
   };
 
   // ===================== INIT =====================
@@ -76,7 +79,7 @@ export class DashboardComponent implements OnInit {
     this.loadStocks();
   }
 
-  // ===================== LOAD VENTES =====================
+  // ===================== LOAD =====================
   loadVentes(): void {
     this.venteService.getAllVente().subscribe({
       next: (data: any[]) => {
@@ -84,68 +87,47 @@ export class DashboardComponent implements OnInit {
         this.buildChart(data);
         this.checkLoading();
       },
-      error: (err) => {
-        console.error('Erreur ventes:', err);
-        this.checkLoading();
-      }
+      error: () => this.checkLoading()
     });
   }
 
-  // ===================== LOAD STOCKS =====================
   loadStocks(): void {
     this.stockService.getAllStocks().subscribe({
       next: (data: IStock[]) => {
         this.stocks.set(data);
         this.checkLoading();
       },
-      error: (err) => {
-        console.error('Erreur stocks:', err);
-        this.checkLoading();
-      }
+      error: () => this.checkLoading()
     });
   }
 
-  // ===================== STOP LOADER QUAND LES 2 SONT CHARGÉS =====================
   private loaded = { ventes: false, stocks: false };
 
   private checkLoading(): void {
-    // On attend que les 2 requêtes soient terminées
-    if (!this.loaded.ventes) {
-      this.loaded.ventes = true;
-    } else if (!this.loaded.stocks) {
-      this.loaded.stocks = true;
-    }
-
-    if (this.loaded.ventes && this.loaded.stocks) {
-      this.isLoading.set(false);
-    }
+    if (!this.loaded.ventes) this.loaded.ventes = true;
+    else if (!this.loaded.stocks) this.loaded.stocks = true;
+    if (this.loaded.ventes && this.loaded.stocks) this.isLoading.set(false);
   }
 
-  // ===================== BUILD CHART =====================
+  // ===================== CHART =====================
   private buildChart(ventes: any[]): void {
     const map = new Map<string, number>();
-
     ventes.forEach(v => {
       const date = new Date(v.creeLe).toLocaleDateString('fr-FR');
       const total = (map.get(date) || 0) + Number(v.montantTotal);
       map.set(date, total);
     });
 
-    const labels = [...map.keys()];
-    const values = [...map.values()];
-
     this.lineChartData = {
-      labels,
-      datasets: [
-        {
-          data: values,
-          label: 'Ventes',
-          fill: true,
-          tension: 0.4,
-          borderColor: '#198754',
-          backgroundColor: 'rgba(25,135,84,0.2)'
-        }
-      ]
+      labels: [...map.keys()],
+      datasets: [{
+        data: [...map.values()],
+        label: 'Ventes',
+        fill: true,
+        tension: 0.4,
+        borderColor: '#198754',
+        backgroundColor: 'rgba(25,135,84,0.2)'
+      }]
     };
   }
 

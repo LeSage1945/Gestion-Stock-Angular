@@ -1,15 +1,16 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CompteService } from './compte.service';
 import { ICompte } from './model/compte.model';
 import { CommonModule } from '@angular/common';
 import { GlobalServiceService } from '../../core/service/global-service.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog-component/confirm-dialog-component';
+import { LoaderComponent } from '../../shared/components/loader-component/loader-component';
 
 @Component({
   selector: 'app-compte-component',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LoaderComponent],
   templateUrl: './compte-component.html',
   styleUrl: './compte-component.css',
 })
@@ -20,11 +21,12 @@ export class CompteComponent implements OnInit {
   private dialog = inject(MatDialog);
 
   comptes = signal<ICompte[]>([]);
+  isLoading = signal(true);
 
-  compteForm = signal<ICompte>({
-    code: '',
-    nom: '',
-  });
+  compteForm = signal<ICompte>({ code: '', nom: '' });
+
+  // ===================== STATS =====================
+  totalComptes = computed(() => this.comptes().length);
 
   ngOnInit(): void {
     this.loadComptes();
@@ -44,17 +46,17 @@ export class CompteComponent implements OnInit {
 
   // ================= LISTE =================
   loadComptes(): void {
+    this.isLoading.set(true);
     this.compteService.getAllCompte().subscribe({
       next: (res) => {
         this.comptes.set(res);
+        this.isLoading.set(false);
       },
       error: (err) => {
+        this.isLoading.set(false);
         this.globalService.alert(
           err?.error?.message || 'Erreur lors du chargement des comptes',
-          'Erreur',
-          'danger',
-          '',
-          'OK'
+          'Erreur', 'danger', '', 'OK'
         );
       }
     });
@@ -66,10 +68,7 @@ export class CompteComponent implements OnInit {
       next: (res) => {
         this.globalService.alert(
           `Le compte "${res.nom}" a été créé avec succès.`,
-          'Compte créé ✅',
-          'success',
-          '',
-          'OK'
+          'Compte créé ✅', 'success', '', 'OK'
         );
         this.comptes.update(list => [...list, res]);
         this.annulerModification();
@@ -77,10 +76,7 @@ export class CompteComponent implements OnInit {
       error: (err) => {
         this.globalService.alert(
           err?.error?.message || 'Erreur lors de la création du compte',
-          'Erreur création ❌',
-          'danger',
-          '',
-          'OK'
+          'Erreur création ❌', 'danger', '', 'OK'
         );
       }
     });
@@ -95,10 +91,7 @@ export class CompteComponent implements OnInit {
       error: (err) => {
         this.globalService.alert(
           err?.error?.message || 'Erreur lors de la récupération du compte',
-          'Erreur',
-          'danger',
-          '',
-          'OK'
+          'Erreur', 'danger', '', 'OK'
         );
       }
     });
@@ -110,10 +103,7 @@ export class CompteComponent implements OnInit {
       next: () => {
         this.globalService.alert(
           'Le compte a été modifié avec succès.',
-          'Compte modifié ✅',
-          'success',
-          '',
-          'OK'
+          'Compte modifié ✅', 'success', '', 'OK'
         );
         this.loadComptes();
         this.annulerModification();
@@ -121,10 +111,7 @@ export class CompteComponent implements OnInit {
       error: (err) => {
         this.globalService.alert(
           err?.error?.message || 'Erreur lors de la modification du compte',
-          'Erreur modification ❌',
-          'danger',
-          '',
-          'OK'
+          'Erreur modification ❌', 'danger', '', 'OK'
         );
       }
     });
@@ -132,10 +119,12 @@ export class CompteComponent implements OnInit {
 
   // ================= DELETE =================
   deleteCompte(id: string): void {
+    const compte = this.comptes().find(c => c.id === id);
+
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: 'Supprimer compte',
-        message: 'Voulez-vous supprimer ce compte ?'
+        message: `Voulez-vous supprimer le compte "${compte?.nom || ''}" ?`
       }
     });
 
@@ -146,20 +135,14 @@ export class CompteComponent implements OnInit {
         next: () => {
           this.globalService.alert(
             'Le compte a été supprimé avec succès.',
-            'Compte supprimé ✅',
-            'success',
-            '',
-            'OK'
+            'Compte supprimé ✅', 'success', '', 'OK'
           );
           this.loadComptes();
         },
         error: (err) => {
           this.globalService.alert(
             err?.error?.message || 'Erreur lors de la suppression du compte',
-            'Erreur suppression ❌',
-            'danger',
-            '',
-            'OK'
+            'Erreur suppression ❌', 'danger', '', 'OK'
           );
         }
       });

@@ -1,24 +1,45 @@
-<div class="dashboard-content">
-  <div class="page-header d-flex justify-content-between align-items-center mb-4">
+<div class="container-fluid">
+  <!-- ===================== HEADER ===================== -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-      <h2 class="page-title d-flex align-items-center gap-2">
-        <span>📁</span> Gestion des Comptes
-      </h2>
-      <p class="text-muted m-0">Suivi et configuration via Angular Signals</p>
+      <h3 class="fw-bold mb-1">📁 Gestion des Comptes</h3>
+      <p class="text-muted mb-0">Suivi et configuration des comptes clients</p>
     </div>
   </div>
 
-  <div class="card mb-4 shadow-sm border-0 grid-card">
-    <div class="card-body">
-      <h4 class="card-title mb-3">
-        @if (compteForm().id) {
-          Modifier le compte ({{ compteForm().code }})
-        } @else {
-          Ajouter un nouveau compte
-        }
-      </h4>
+  @if (isLoading()) {
+    <app-loader-component [isLoading]="isLoading()"></app-loader-component>
+  } @else {
+    <!-- ===================== STATS ===================== -->
+    <div class="row g-4 mb-4">
+      <div class="col-md-12">
+        <div class="card border-0 shadow-sm rounded-4 bg-primary text-white">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="text-uppercase opacity-75">Total comptes</h6>
+                <h2 class="fw-bold mb-0">{{ totalComptes() }}</h2>
+              </div>
+              <i class="bi bi-folder2-open fs-1 opacity-50"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-      <form (submit)="$event.preventDefault()">
+    <!-- ===================== FORMULAIRE ===================== -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-4">
+          @if (compteForm().id) {
+            <i class="bi bi-pencil-square me-2"></i>
+            Modifier le compte ({{ compteForm().code }})
+          } @else {
+            <i class="bi bi-plus-circle me-2"></i>
+            Ajouter un nouveau compte
+          }
+        </h5>
+
         <div class="row g-3">
           <div class="col-md-5">
             <label class="form-label text-muted small fw-bold">Code du compte</label>
@@ -30,6 +51,7 @@
               placeholder="Ex: CPT-001"
             />
           </div>
+
           <div class="col-md-5">
             <label class="form-label text-muted small fw-bold">Nom du compte</label>
             <input
@@ -40,6 +62,7 @@
               placeholder="Ex: Caisse Principale"
             />
           </div>
+
           <div class="col-md-2 d-flex align-items-end gap-2">
             @if (compteForm().id) {
               <button
@@ -47,83 +70,110 @@
                 class="btn btn-success w-100"
                 (click)="updateCompte(compteForm().id!)"
               >
-                Modifier
+                <i class="bi bi-check-lg me-1"></i> Modifier
               </button>
               <button
                 type="button"
-                class="btn btn-light border w-100"
+                class="btn btn-outline-secondary w-100"
                 (click)="annulerModification()"
               >
                 Annuler
               </button>
             } @else {
-              <button type="button" class="btn btn-primary btn-add w-100" (click)="createCompte()">
-                Enregistrer
+              <button type="button" class="btn btn-primary w-100" (click)="createCompte()">
+                <i class="bi bi-save me-1"></i> Enregistrer
               </button>
             }
           </div>
         </div>
-      </form>
-    </div>
-  </div>
-
-  <div class="card shadow-sm border-0 grid-card">
-    <div class="card-body p-0">
-      <div class="p-3 border-bottom d-flex align-items-center gap-2">
-        <span>📋</span> <strong class="table-section-title">Liste des comptes</strong>
-      </div>
-
-      <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0 custom-table">
-          <thead>
-            <tr>
-              <th scope="col">Code</th>
-              <th scope="col">Nom du Compte</th>
-              <th scope="col">Créé le</th>
-              <th scope="col" class="text-end">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (item of comptes(); track item.id) {
-              <tr>
-                <td class="fw-bold">{{ item.code }}</td>
-                <td>{{ item.nom }}</td>
-                <td class="text-muted">
-                  @if (item.creeLe) {
-                    {{ item.creeLe | date: 'dd/MM/yyyy HH:mm' }}
-                  } @else {
-                    --
-                  }
-                </td>
-                <td class="text-end">
-                  <div class="d-flex justify-content-end gap-2 pe-2">
-                    @if (item.id) {
-                      <button
-                        class="btn btn-action btn-edit-item"
-                        title="Modifier"
-                        (click)="getCompte(item.id)"
-                      >
-                        ✏️
-                      </button>
-                      <button
-                        class="btn btn-action btn-delete-item"
-                        title="Supprimer"
-                        (click)="deleteCompte(item.id)"
-                      >
-                        🗑️
-                      </button>
-                    }
-                  </div>
-                </td>
-              </tr>
-            } @empty {
-              <tr>
-                <td colspan="4" class="text-center py-4 text-muted">Aucun compte trouvé.</td>
-              </tr>
-            }
-          </tbody>
-        </table>
       </div>
     </div>
-  </div>
+
+    <!-- ===================== TABLE ===================== -->
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <h5 class="fw-bold mb-1">
+              <i class="bi bi-table me-2"></i>
+              Liste des comptes
+            </h5>
+            <p class="text-muted mb-0">{{ totalComptes() }} compte(s) enregistré(s)</p>
+          </div>
+        </div>
+
+        @if (comptes().length > 0) {
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead class="table-dark">
+                <tr>
+                  <th>Code</th>
+                  <th>Nom du compte</th>
+                  <th>Créé le</th>
+                  <th class="text-end">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of comptes(); track item.id) {
+                  <tr>
+                    <td>
+                      <span class="badge bg-secondary px-2 py-2 fw-semibold">
+                        {{ item.code }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="d-flex align-items-center gap-2">
+                        <div
+                          class="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center"
+                          style="width: 36px; height: 36px; min-width: 36px"
+                        >
+                          <i class="bi bi-building"></i>
+                        </div>
+                        <span class="fw-bold">{{ item.nom }}</span>
+                      </div>
+                    </td>
+                    <td class="text-muted">
+                      @if (item.creeLe) {
+                        {{ item.creeLe | date: 'dd/MM/yyyy HH:mm' }}
+                      } @else {
+                        --
+                      }
+                    </td>
+                    <td class="text-end">
+                      <div class="d-flex justify-content-end gap-2">
+                        @if (item.id) {
+                          <button
+                            class="btn btn-sm btn-warning rounded-circle"
+                            style="width: 35px; height: 35px"
+                            title="Modifier"
+                            (click)="getCompte(item.id!)"
+                          >
+                            <i class="bi bi-pencil text-white"></i>
+                          </button>
+                          <button
+                            class="btn btn-sm btn-danger rounded-circle"
+                            style="width: 35px; height: 35px"
+                            title="Supprimer"
+                            (click)="deleteCompte(item.id!)"
+                          >
+                            <i class="bi bi-trash"></i>
+                          </button>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <div class="text-center py-5">
+            <i class="bi bi-inbox fs-1 text-muted"></i>
+            <h5 class="mt-3 text-muted">Aucun compte enregistré</h5>
+            <p class="text-muted">Utilisez le formulaire ci-dessus pour en ajouter un.</p>
+          </div>
+        }
+      </div>
+    </div>
+  }
 </div>

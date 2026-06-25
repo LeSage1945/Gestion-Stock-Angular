@@ -28,16 +28,14 @@ export class ReportsComponent implements OnInit {
   filtre = signal<FiltreDate>('tout');
   recherche = signal('');
 
-  // ===================== VENTES FILTRÉES PAR DATE =====================
+  // ===================== VENTES FILTRÉES =====================
   ventesFiltrees = computed(() => {
     const toutes = this.ventes();
     const f = this.filtre();
     const now = new Date();
 
     if (f === 'aujourd_hui') {
-      return toutes.filter(v =>
-        new Date(v.creeLe).toDateString() === now.toDateString()
-      );
+      return toutes.filter(v => new Date(v.creeLe).toDateString() === now.toDateString());
     }
     if (f === 'semaine') {
       const debut = new Date(now);
@@ -53,7 +51,6 @@ export class ReportsComponent implements OnInit {
     return toutes;
   });
 
-  // ===================== VENTES FILTRÉES PAR DATE + RECHERCHE =====================
   ventesAffichees = computed(() => {
     const terme = this.recherche().toLowerCase().trim();
     if (!terme) return this.ventesFiltrees();
@@ -86,7 +83,26 @@ export class ReportsComponent implements OnInit {
     this.stocks().filter(s => s.stockActuel <= s.seuilAlerte).length
   );
 
-  // ===================== LINE CHART (CA par jour) =====================
+  // ===================== STATS FINANCIÈRES =====================
+  totalAttendu = computed(() =>
+    this.stocks().reduce((sum, s) => sum + ((s as any).totalAttendu || 0), 0)
+  );
+
+  totalRealise = computed(() =>
+    this.stocks().reduce((sum, s) => sum + ((s as any).totalRealise || 0), 0)
+  );
+
+  manqueAGagner = computed(() =>
+    this.stocks().reduce((sum, s) => sum + ((s as any).manqueAGagner || 0), 0)
+  );
+
+  tauxRealisation = computed(() => {
+    const attendu = this.totalAttendu();
+    if (attendu === 0) return 0;
+    return Math.round((this.totalRealise() / attendu) * 100);
+  });
+
+  // ===================== CHARTS =====================
   lineChartData: ChartConfiguration<'line'>['data'] = {
     labels: [],
     datasets: [{
@@ -120,7 +136,6 @@ export class ReportsComponent implements OnInit {
     }
   };
 
-  // ===================== BAR CHART (ventes par produit) =====================
   barChartData: ChartConfiguration<'bar'>['data'] = {
     labels: [],
     datasets: [{
@@ -144,14 +159,10 @@ export class ReportsComponent implements OnInit {
       }
     },
     scales: {
-      y: {
-        beginAtZero: true,
-        ticks: { stepSize: 1 }
-      }
+      y: { beginAtZero: true, ticks: { stepSize: 1 } }
     }
   };
 
-  // ===================== REBUILD CHARTS QUAND FILTRE CHANGE =====================
   constructor() {
     effect(() => {
       const ventes = this.ventesFiltrees();
@@ -172,8 +183,7 @@ export class ReportsComponent implements OnInit {
         this.ventes.set(data);
         this.loadStocks();
       },
-      error: (err) => {
-        console.error('Erreur ventes:', err);
+      error: () => {
         this.erreur.set('Erreur lors du chargement des ventes.');
         this.isLoading.set(false);
       }
@@ -186,15 +196,14 @@ export class ReportsComponent implements OnInit {
         this.stocks.set(data);
         this.isLoading.set(false);
       },
-      error: (err) => {
-        console.error('Erreur stocks:', err);
+      error: () => {
         this.erreur.set('Erreur lors du chargement des stocks.');
         this.isLoading.set(false);
       }
     });
   }
 
-  // ===================== BUILD LINE CHART =====================
+  // ===================== CHARTS =====================
   private buildLineChart(ventes: Vente[]): void {
     const map = new Map<string, number>();
     ventes.forEach(v => {
@@ -216,7 +225,6 @@ export class ReportsComponent implements OnInit {
     };
   }
 
-  // ===================== BUILD BAR CHART =====================
   private buildBarChart(ventes: Vente[]): void {
     const map = new Map<string, number>();
     ventes.forEach(v => {
@@ -226,7 +234,6 @@ export class ReportsComponent implements OnInit {
       });
     });
 
-    // Trier par quantité décroissante
     const sorted = [...map.entries()].sort((a, b) => b[1] - a[1]);
 
     this.barChartData = {
@@ -241,7 +248,7 @@ export class ReportsComponent implements OnInit {
     };
   }
 
-  // ===================== FILTRE =====================
+  // ===================== FILTRES =====================
   setFiltre(f: FiltreDate): void {
     this.filtre.set(f);
     this.recherche.set('');
@@ -284,6 +291,10 @@ export class ReportsComponent implements OnInit {
         ["Chiffre d'affaires", this.formatMontant(this.chiffreAffaires())],
         ['Stock restant', `${this.stockRestant()}`],
         ['Alertes stock', `${this.nombreAlertes()}`],
+        ['Total attendu', this.formatMontant(this.totalAttendu())],
+        ['Chiffre réalisé', this.formatMontant(this.totalRealise())],
+        ['Manque à gagner', this.formatMontant(this.manqueAGagner())],
+        ['Taux de réalisation', `${this.tauxRealisation()}%`],
       ],
       headStyles: { fillColor: [33, 37, 41] },
       alternateRowStyles: { fillColor: [248, 249, 250] },
@@ -320,16 +331,19 @@ export class ReportsComponent implements OnInit {
 
     autoTable(doc, {
       startY: stocksTitleY + 5,
-      head: [['Produit', 'Marque', 'Entrées', 'Ventes', 'Sorties', 'Stock actuel', 'Statut']],
+      head: [['Produit', 'Marque', 'Entrées', 'Sorties', 'Stock actuel', 'Total attendu', 'Réalisé', 'Manque', 'Statut']],
       body: this.stocks().map(s => [
         s.nom, s.marque,
-        `${s.entrees}`, `${s.ventes}`, `${s.sorties}`, `${s.stockActuel}`,
+        `${s.entrees}`, `${s.sorties}`, `${s.stockActuel}`,
+        this.formatMontant((s as any).totalAttendu || 0),
+        this.formatMontant((s as any).totalRealise || 0),
+        this.formatMontant((s as any).manqueAGagner || 0),
         s.stockActuel <= s.seuilAlerte ? '⚠️ Alerte' : '✅ OK',
       ]),
       headStyles: { fillColor: [33, 37, 41] },
       alternateRowStyles: { fillColor: [248, 249, 250] },
       margin: { left: 14, right: 14 },
-      styles: { fontSize: 9 },
+      styles: { fontSize: 8 },
     });
 
     const pageCount = doc.getNumberOfPages();
@@ -368,4 +382,8 @@ export class ReportsComponent implements OnInit {
   isEnAlerte(stock: StockProduit): boolean {
     return stock.stockActuel <= stock.seuilAlerte;
   }
+
+  getFinancial(stock: any, field: string): number {
+  return stock[field] || 0;
+}
 }

@@ -46,7 +46,7 @@ export class GlobalServiceService {
     }
 
     // ✅ remplace alert() natif par ta dialog
-    this.alert(message, 'Erreur', 'danger', '', 'OK');
+    // this.alert(message, 'Erreur', 'danger', '', 'OK');
 
     return throwError(() => error);
   }
@@ -144,12 +144,11 @@ export class GlobalServiceService {
         content: msg,
         type: type,
         buttonCancelName: type === 'success' ? '' : btnCancel,
-        buttonOKName: type === 'success' ? '' : btnOk,  // ✅ pas de bouton si success
+        buttonOKName: type === 'success' ? '' : btnOk,
         title: title,
       }
     });
 
-    // ✅ auto-fermeture après 2.5s si success
     if (type === 'success') {
       setTimeout(() => ref.close(), 1500);
     }
