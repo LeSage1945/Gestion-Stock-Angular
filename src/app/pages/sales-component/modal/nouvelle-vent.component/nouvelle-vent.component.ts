@@ -6,7 +6,6 @@ import { FormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ProduitService } from '../../../products-component/produit.service';
 
-
 @Component({
   selector: 'app-nouvelle-vent.component',
   standalone: true,
@@ -21,13 +20,12 @@ export class NouvelleVentComponent implements OnInit {
   panier: any[] = [];
   total: number = 0;
   userId!: number;
-  produit: any[] = []
+  produit: any[] = [];
   // 🔎 recherche produits
   search: string = '';
 
   private produitService = inject(ProduitService);
   private cdr = inject(ChangeDetectorRef);
-
 
   constructor(
     private dialogRef: MatDialogRef<NouvelleVentComponent>,
@@ -46,16 +44,12 @@ export class NouvelleVentComponent implements OnInit {
 
   getUserConnect() {
     const user = localStorage.getItem('user');
-
     console.log('USER LOCALSTORAGE =', user);
 
     if (user) {
       const userData = JSON.parse(user);
-
       console.log('USER PARSE =', userData);
-
-      this.userId = userData.id; // ✅ FIX ICI
-
+      this.userId = userData.id;
       console.log('USER ID =', this.userId);
     }
   }
@@ -64,7 +58,7 @@ export class NouvelleVentComponent implements OnInit {
     this.produitService.getAllProduit().subscribe({
       next: (data) => {
         this.produit = data;
-        this.cdr.detectChanges(); // ✅ force la mise à jour
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Erreur chargement produits', err);
@@ -72,28 +66,27 @@ export class NouvelleVentComponent implements OnInit {
     });
   }
 
-  // ================= AJOUT PRODUIT =================
-  ajouterProduit(produit: any) {
+  // ================= AJOUT PRODUIT AVEC QUANTITÉ =================
+  ajouterProduit(produit: any, quantite: number) {
+    if (quantite <= 0) return;
+
     const exist = this.panier.find(p => p.id === produit.id);
 
     if (exist) {
-      exist.quantite++;
+      exist.quantite += quantite;
       exist.total = exist.quantite * exist.prix;
     } else {
       this.panier.push({
         id: produit.id,
         nom: produit.nom,
         prix: produit.prix,
-        quantite: 1,
-        total: produit.prix
+        quantite: quantite,
+        total: produit.prix * quantite
       });
     }
 
     this.calculTotal();
   }
-
-  // ================ RECUPERATION DES PRODUITS ==================
-
 
   // ================= SUPPRIMER =================
   removeProduit(index: number) {
@@ -108,7 +101,6 @@ export class NouvelleVentComponent implements OnInit {
 
   // ================= VALIDER VENTE =================
   validerVente() {
-
     if (this.panier.length === 0) {
       alert("Panier vide !");
       return;
@@ -117,13 +109,11 @@ export class NouvelleVentComponent implements OnInit {
     const vente = {
       utilisateurId: this.userId,
       montantTotal: this.total,
-
       lignes: this.panier.map(p => ({
         produitId: p.id,
         quantite: p.quantite,
         prix: p.prix
       })),
-
       paiements: [
         {
           montant: this.total,
@@ -133,7 +123,6 @@ export class NouvelleVentComponent implements OnInit {
     };
 
     console.log("VENTE FINAL => ", vente);
-
     this.dialogRef.close(vente);
   }
 
