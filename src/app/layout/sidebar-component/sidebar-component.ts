@@ -14,8 +14,115 @@ export class SidebarComponent {
 
   private authService = inject(AuthService);
 
+  // menu = [
+  //   // ===== GÉNÉRAL =====
+  //   {
+  //     label: 'Tableau de bord',
+  //     route: '/dashboard',
+  //     icon: 'bi bi-speedometer2',
+  //     roles: ['SUPER_ADMIN', 'ADMIN', 'VENDEUR', 'CAISSIER'],
+  //     premium: false,
+  //     group: 'Général'
+  //   },
+
+  //   // ===== VENTES & STOCK =====
+  //   {
+  //     label: 'Caisse',
+  //     route: '/caisses',
+  //     icon: 'bi bi-cart-check',
+  //     roles: ['SUPER_ADMIN', 'ADMIN', 'CAISSIER'],
+  //     premium: false,
+  //     group: 'Commerce'
+  //   },
+  //   {
+  //     label: 'Ventes',
+  //     route: '/sales',
+  //     icon: 'bi bi-cart-check',
+  //     roles: ['SUPER_ADMIN', 'ADMIN', 'CAISSIER'],
+  //     premium: false,
+  //     group: 'Commerce'
+  //   },
+  //   {
+  //     label: 'Produits',
+  //     route: '/products',
+  //     icon: 'bi bi-box-seam',
+  //     roles: ['SUPER_ADMIN', 'ADMIN', 'VENDEUR'],
+  //     premium: false,
+  //     group: 'Commerce'
+  //   },
+  //   {
+  //     label: 'Stocks',
+  //     route: '/stock',
+  //     icon: 'bi bi-archive',
+  //     roles: ['SUPER_ADMIN', 'ADMIN', 'VENDEUR'],
+  //     premium: false,
+  //     group: 'Commerce'
+  //   },
+  //   {
+  //     label: 'Fournisseurs',
+  //     route: '/fournisseurs',
+  //     icon: 'bi bi-truck',
+  //     roles: ['SUPER_ADMIN', 'ADMIN'],
+  //     premium: false,
+  //     group: 'Commerce'
+  //   },
+
+  //   // ===== ANALYSE =====
+  //   {
+  //     label: 'Rapports',
+  //     route: '/reports',
+  //     icon: 'bi bi-bar-chart-line',
+  //     roles: ['SUPER_ADMIN', 'ADMIN'],
+  //     premium: false,
+  //     group: 'Analyse'
+  //   },
+
+  //   // ===== ADMINISTRATION =====
+  //   {
+  //     label: 'Utilisateurs',
+  //     route: '/users',
+  //     icon: 'bi bi-people',
+  //     roles: ['SUPER_ADMIN', 'ADMIN'],
+  //     premium: false,
+  //     group: 'Administration'
+  //   },
+  //   {
+  //     label: 'Paramètres',
+  //     route: '/settings',
+  //     icon: 'bi bi-gear',
+  //     roles: ['SUPER_ADMIN', 'ADMIN'],
+  //     premium: false,
+  //     group: 'Administration'
+  //   },
+
+  //   // ===== SUPER ADMIN =====
+  //   {
+  //     label: 'Comptes',
+  //     route: '/compte',
+  //     icon: 'bi bi-folder2-open',
+  //     roles: ['SUPER_ADMIN'],
+  //     premium: false,
+  //     group: 'Super Admin'
+  //   },
+  //   {
+  //     label: 'Utilisateurs admin',
+  //     route: '/admin-users',
+  //     icon: 'bi bi-person-badge',
+  //     roles: ['SUPER_ADMIN'],
+  //     premium: false,
+  //     group: 'Super Admin'
+  //   },
+  //   {
+  //     label: 'Abonnements',
+  //     route: '/abonnement',
+  //     icon: 'bi bi-credit-card',
+  //     roles: ['SUPER_ADMIN'],
+  //     premium: false,
+  //     group: 'Super Admin'
+  //   },
+  // ];
   menu = [
-    // ===== GÉNÉRAL =====
+    // ===== TABLEAU DE BORD =====
     {
       label: 'Tableau de bord',
       route: '/dashboard',
@@ -25,30 +132,40 @@ export class SidebarComponent {
       group: 'Général'
     },
 
-    // ===== VENTES & STOCK =====
+    // ===== CAISSE =====
+    {
+      label: 'Caisse',
+      route: '/caisses',
+      icon: 'bi bi-cash-stack',
+      roles: ['SUPER_ADMIN', 'ADMIN', 'CAISSIER'],
+      premium: false,
+      group: 'Caisse'
+    },
     {
       label: 'Ventes',
       route: '/sales',
-      icon: 'bi bi-cart-check',
+      icon: 'bi bi-receipt',
       roles: ['SUPER_ADMIN', 'ADMIN', 'CAISSIER'],
       premium: false,
-      group: 'Commerce'
+      group: 'Caisse'
     },
+
+    // ===== STOCK =====
     {
       label: 'Produits',
       route: '/products',
       icon: 'bi bi-box-seam',
       roles: ['SUPER_ADMIN', 'ADMIN', 'VENDEUR'],
       premium: false,
-      group: 'Commerce'
+      group: 'Stock'
     },
     {
       label: 'Stocks',
       route: '/stock',
-      icon: 'bi bi-archive',
+      icon: 'bi bi-boxes',
       roles: ['SUPER_ADMIN', 'ADMIN', 'VENDEUR'],
       premium: false,
-      group: 'Commerce'
+      group: 'Stock'
     },
     {
       label: 'Fournisseurs',
@@ -56,17 +173,17 @@ export class SidebarComponent {
       icon: 'bi bi-truck',
       roles: ['SUPER_ADMIN', 'ADMIN'],
       premium: false,
-      group: 'Commerce'
+      group: 'Stock'
     },
 
-    // ===== ANALYSE =====
+    // ===== ANALYSES =====
     {
       label: 'Rapports',
       route: '/reports',
-      icon: 'bi bi-bar-chart-line',
+      icon: 'bi bi-graph-up-arrow',
       roles: ['SUPER_ADMIN', 'ADMIN'],
       premium: false,
-      group: 'Analyse'
+      group: 'Analyses'
     },
 
     // ===== ADMINISTRATION =====
@@ -91,7 +208,7 @@ export class SidebarComponent {
     {
       label: 'Comptes',
       route: '/compte',
-      icon: 'bi bi-folder2-open',
+      icon: 'bi bi-buildings',
       roles: ['SUPER_ADMIN'],
       premium: false,
       group: 'Super Admin'
@@ -107,11 +224,11 @@ export class SidebarComponent {
     {
       label: 'Abonnements',
       route: '/abonnement',
-      icon: 'bi bi-credit-card',
+      icon: 'bi bi-credit-card-2-front',
       roles: ['SUPER_ADMIN'],
       premium: false,
       group: 'Super Admin'
-    },
+    }
   ];
 
   get filteredMenu() {

@@ -21,6 +21,7 @@ import { AbonnementComponent } from './pages/abonnement/abonnement.component/abo
 import { abonnementGuard } from './core/guards/abonnement-guard';
 import { CompteComponent } from './pages/compte-component/compte-component';
 import { AdminUserComponent } from './pages/admin-user-component/admin-user-component';
+import { CaisseComponent } from './pages/caisse-component/caisse-component';
 
 export const routes: Routes = [
 
@@ -102,6 +103,11 @@ export const routes: Routes = [
       {
         path: 'reports',
         component: ReportsComponent
+      },
+
+      {
+        path: 'caisses',
+        component: CaisseComponent
       },
 
       {

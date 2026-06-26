@@ -17,27 +17,43 @@
 
         <!-- QUANTITE -->
         <div class="mb-3">
-          <label>Quantité</label>
-          <input type="number" class="form-control" [(ngModel)]="quantite" />
+          <label>Quantité (en paquets)</label>
+          <input
+            type="number"
+            class="form-control"
+            [(ngModel)]="quantite"
+            min="1"
+            placeholder="Ex: 125"
+          />
         </div>
 
-        <!-- PRIX ACHAT -->
+        <!-- MONTANT TOTAL PAYÉ -->
         <div class="mb-3">
-          <label>Prix d'achat</label>
-          <input type="number" class="form-control" [(ngModel)]="prixAchat" />
+          <label>Montant total payé (FCFA)</label>
+          <input
+            type="number"
+            class="form-control"
+            [(ngModel)]="montantTotal"
+            min="1"
+            placeholder="Ex: 98250"
+          />
         </div>
+
+        <!-- PRIX UNITAIRE CALCULÉ -->
+        @if (quantite > 0 && montantTotal > 0) {
+          <div class="alert alert-info py-2 mb-3">
+            💡 Prix unitaire calculé :
+            <strong>{{ prixUnitaire | number: '1.0-0' }} FCFA / paquet</strong>
+          </div>
+        }
 
         <!-- FOURNISSEUR -->
         <div class="mb-3">
           <label>Fournisseur</label>
-
           <select class="form-control" [(ngModel)]="fournisseurId">
             <option value="">-- Choisir un fournisseur --</option>
-
             @for (f of fournisseurs; track f.id) {
-              <option [value]="f.id">
-                {{ f.nom }}
-              </option>
+              <option [value]="f.id">{{ f.nom }}</option>
             }
           </select>
         </div>
@@ -46,7 +62,6 @@
       <!-- FOOTER -->
       <div class="modal-footer">
         <button class="btn btn-outline-secondary" (click)="close()">Annuler</button>
-
         <button class="btn btn-success" (click)="save()">Valider</button>
       </div>
     </div>
