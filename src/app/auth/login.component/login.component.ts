@@ -74,23 +74,21 @@ export class LoginComponent {
 
       next: (response) => {
 
-        localStorage.setItem('token', response.access_token);
+        this.loading = false;
 
-        localStorage.setItem('abonnement', 'ACTIF'); // 🔥 TEMPORAIRE
+        localStorage.setItem('token', response.access_token);
+        localStorage.setItem('abonnement', 'ACTIF');
 
         this.router.navigate(['/dashboard']);
       },
 
       error: (error) => {
 
-        console.log(error);
-
         this.loading = false;
 
         this.messageErreur =
-          error?.error?.message ||
-          'Erreur de connexion';
-      },
+          error?.error?.message || 'Erreur de connexion';
+      }
     });
   }
 

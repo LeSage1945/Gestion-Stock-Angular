@@ -22,6 +22,10 @@ export class CaisseService {
     return this.api.request<IMouvementCaisse>('caisse/manuel', 'POST', data);
   }
 
+  update(id: string, dto: { montant?: number; motif?: string }): Observable<IMouvementCaisse> {
+    return this.api.request<IMouvementCaisse>(`caisse/update/${id}`, 'PUT', dto);
+  }
+
   delete(id: string): Observable<any> {
     return this.api.request(`caisse/delete/${id}`, 'DELETE');
   }

@@ -1,36 +1,95 @@
+/* login-component.css */
+.login-wrap {
+  display: flex;
+  min-height: 100vh;
+}
 
-      .login-container {
-        height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
+.login-left {
+  flex: 1;
+  background: #0a2540;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  position: relative;
+  overflow: hidden;
+}
 
-      .login-card {
-        width: 900px;
-        border-radius: 15px;
-        overflow: hidden;
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-      }
+.logo-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  z-index: 1;
+}
 
-      .login-image {
-        background: url('../../../assets/bgConnexion.png') center/cover;
-        min-height: 500px;
-      }
+.logo-img { width: 90px; height: 90px; }
+.logo-title { color: #fff; font-size: 24px; font-weight: 600; }
+.logo-sub { color: #7fa8cc; font-size: 14px; text-align: center; max-width: 200px; line-height: 1.6; }
 
-      .login-form {
-        background: white;
-        padding: 40px;
-      }
+.features {
+  margin-top: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  z-index: 1;
+}
 
-      .title {
-        font-weight: bold;
-        margin-bottom: 10px;
-      }
+.feat { display: flex; align-items: center; gap: 10px; color: #7fa8cc; font-size: 14px; }
+.feat i { color: #4a9fd4; font-size: 16px; }
 
-      .subtitle {
-        color: gray;
-        font-size: 14px;
-        margin-bottom: 25px;
-      }
-    
+.login-right {
+  flex: 1;
+  background: #fff;
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.form-title { font-size: 26px; font-weight: 600; color: #0a2540; margin-bottom: 4px; }
+.form-sub { font-size: 14px; color: #888; margin-bottom: 2rem; }
+
+.field { margin-bottom: 1rem; }
+.field label { display: block; font-size: 13px; font-weight: 500; color: #444; margin-bottom: 5px; }
+.field .form-control {
+  height: 42px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  padding: 0 12px;
+}
+.field .form-control:focus {
+  border-color: #4a9fd4;
+  box-shadow: 0 0 0 3px rgba(74,159,212,0.15);
+}
+
+.row-check { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+.check-label { display: flex; align-items: center; gap: 7px; font-size: 13px; color: #555; }
+.forgot { font-size: 13px; color: #4a9fd4; cursor: pointer; }
+
+.btn-login {
+  width: 100%;
+  height: 44px;
+  background: #0a2540;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-login:hover { background: #0d3060; }
+.btn-login:disabled { opacity: 0.7; cursor: not-allowed; }
+
+.badge-secure {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #aaa;
+  margin-top: 1.2rem;
+}
